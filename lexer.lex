@@ -27,8 +27,9 @@ case             { return case_token; }
 default          { return default_token; }
 for              { return for_token; }
 while            { return while_token; }
+==               { return eq_token; }
 
-[@<>,+/*():=!$|'\[\]{}-]      { return *yytext; }
+[@<>,+/*();:=!$|'\[\]{}-]      { return *yytext; }
 {ID}             { yylval.s = new std::string(yytext); return id_token; }
 
 \".*\"           { yylval.s = new std::string(yytext); return string_token; }
@@ -38,5 +39,5 @@ while            { return while_token; }
 
 \/\/.*           { }//jednolinijski komentar
 [ \t\n]          { }
-.                { std::cerr << Lex err: << yytext << std::endl; }
+.                { std::cerr << "Lex err: " << yytext << std::endl; }
 %%

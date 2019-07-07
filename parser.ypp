@@ -1,0 +1,104 @@
+%{
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <string>
+#include <vector>
+#include "ast.hpp"
+
+extern int yylex();
+
+void yyerror(std::string s) {
+    std::cerr << s << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+%}
+
+%union {
+    double d;
+    int i;
+    std::string *s;
+}
+
+
+%token if_token else_token while_token for_token switch_token
+case_token int_token double_token char_token default_token eq_token
+
+%token <s> id_token string_token
+%token <d> d_num_token
+%token <i> i_num_token
+
+%right '='
+%nonassoc else_token
+%left '<' '>' eq_token
+%left '+' '-'
+%left '*' '/'
+
+
+%%
+
+Program: Program Statement
+    |    Statement
+    ;
+
+Statement: Proto '{' Block '}'
+    ;
+
+Block: Block Loop_or_E  {//ne moze vako 
+    }
+    | Loop_or_E 
+    ;
+
+Loop_or_E: Loop
+    |      E ';'
+    ;
+
+Loop: if_token '(' E ')' '{' Block '}' else_token '{' Block '}'
+    | if_token '(' E ')' '{' Block '}' 
+    | while_token '(' E ')' '{' Block '}'
+    ;
+
+Proto: Type id_token '(' Args ')'
+    ;
+
+Type: int_token
+    | char_token
+    | double_token
+    ;
+
+Args: Args ',' TypeArg
+    | TypeArg
+    |
+    ;
+
+TypeArg: double_token id_token
+    |    int_token id_token
+    |    char_token id_token
+    ;
+
+E:    E '+' E
+    | E '-' E
+    | E '*' E
+    | E '/' E
+    | E '>' E
+    | E '<' E
+    | E eq_token E
+    | id_token '=' E
+    | TypeArg '=' E
+    | '(' E ')'
+    | i_num_token
+    | d_num_token
+    | char_token
+    | string_token
+    | id_token
+    |
+    ;
+
+%%
+
+int main(int argc, char **argv) {
+    
+    yyparse();
+    return 0;
+}
