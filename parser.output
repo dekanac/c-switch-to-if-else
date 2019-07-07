@@ -14,1120 +14,1159 @@ Grammar
     2        | Statement
 
     3 Statement: Proto '{' Block '}'
+    4          | Proto ';'
+    5          | include_token ppd_token
+    6          | include_token string_token
 
-    4 Block: Block Loop_or_E
-    5      | Loop_or_E
+    7 Block: Block Loop_or_E
+    8      | Loop_or_E
 
-    6 Loop_or_E: Loop
-    7          | E ';'
+    9 Loop_or_E: Loop
+   10          | E ';'
 
-    8 Loop: if_token '(' E ')' '{' Block '}' else_token '{' Block '}'
-    9     | if_token '(' E ')' '{' Block '}'
-   10     | while_token '(' E ')' '{' Block '}'
+   11 Loop: if_token '(' E ')' '{' Block '}' else_token '{' Block '}'
+   12     | if_token '(' E ')' '{' Block '}'
+   13     | while_token '(' E ')' '{' Block '}'
 
-   11 Proto: Type id_token '(' Args ')'
+   14 Proto: Type id_token '(' Args ')'
 
-   12 Type: int_token
-   13     | char_token
-   14     | double_token
+   15 Type: int_token
+   16     | char_token
+   17     | double_token
 
-   15 Args: Args ',' TypeArg
-   16     | TypeArg
-   17     | %empty
+   18 Args: Args ',' TypeArg
+   19     | TypeArg
+   20     | %empty
 
-   18 TypeArg: double_token id_token
-   19        | int_token id_token
-   20        | char_token id_token
+   21 TypeArg: double_token id_token
+   22        | int_token id_token
+   23        | char_token id_token
 
-   21 E: E '+' E
-   22  | E '-' E
-   23  | E '*' E
-   24  | E '/' E
-   25  | E '>' E
-   26  | E '<' E
-   27  | E eq_token E
-   28  | id_token '=' E
-   29  | TypeArg '=' E
-   30  | '(' E ')'
-   31  | i_num_token
-   32  | d_num_token
-   33  | char_token
-   34  | string_token
-   35  | id_token
-   36  | %empty
+   24 E: E '+' E
+   25  | E '-' E
+   26  | E '*' E
+   27  | E '/' E
+   28  | E '>' E
+   29  | E '<' E
+   30  | E eq_token E
+   31  | id_token '=' E
+   32  | TypeArg '=' E
+   33  | '(' E ')'
+   34  | i_num_token
+   35  | d_num_token
+   36  | char_token
+   37  | string_token
+   38  | id_token
+   39  | %empty
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-'(' (40) 8 9 10 11 30
-')' (41) 8 9 10 11 30
-'*' (42) 23
-'+' (43) 21
-',' (44) 15
-'-' (45) 22
-'/' (47) 24
-';' (59) 7
-'<' (60) 26
-'=' (61) 28 29
-'>' (62) 25
-'{' (123) 3 8 9 10
-'}' (125) 3 8 9 10
+'(' (40) 11 12 13 14 33
+')' (41) 11 12 13 14 33
+'*' (42) 26
+'+' (43) 24
+',' (44) 18
+'-' (45) 25
+'/' (47) 27
+';' (59) 4 10
+'<' (60) 29
+'=' (61) 31 32
+'>' (62) 28
+'{' (123) 3 11 12 13
+'}' (125) 3 11 12 13
 error (256)
-if_token (258) 8 9
-else_token (259) 8
-while_token (260) 10
+if_token (258) 11 12
+else_token (259) 11
+while_token (260) 13
 for_token (261)
 switch_token (262)
 case_token (263)
-int_token (264) 12 19
-double_token (265) 14 18
-char_token (266) 13 20 33
+int_token (264) 15 22
+double_token (265) 17 21
+char_token (266) 16 23 36
 default_token (267)
-eq_token (268) 27
-id_token <s> (269) 11 18 19 20 28 35
-string_token <s> (270) 34
-d_num_token <d> (271) 32
-i_num_token <i> (272) 31
+eq_token (268) 30
+include_token (269) 5 6
+ppd_token (270) 5
+id_token <s> (271) 14 21 22 23 31 38
+string_token <s> (272) 6 37
+d_num_token <d> (273) 35
+i_num_token <i> (274) 34
 
 
 Nonterminals, with rules where they appear
 
-$accept (31)
+$accept (33)
     on left: 0
-Program (32)
+Program (34)
     on left: 1 2, on right: 0 1
-Statement (33)
-    on left: 3, on right: 1 2
-Block (34)
-    on left: 4 5, on right: 3 4 8 9 10
-Loop_or_E (35)
-    on left: 6 7, on right: 4 5
-Loop (36)
-    on left: 8 9 10, on right: 6
-Proto (37)
-    on left: 11, on right: 3
-Type (38)
-    on left: 12 13 14, on right: 11
-Args (39)
-    on left: 15 16 17, on right: 11 15
-TypeArg (40)
-    on left: 18 19 20, on right: 15 16 29
-E (41)
-    on left: 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36, on right:
-    7 8 9 10 21 22 23 24 25 26 27 28 29 30
+Statement (35)
+    on left: 3 4 5 6, on right: 1 2
+Block (36)
+    on left: 7 8, on right: 3 7 11 12 13
+Loop_or_E (37)
+    on left: 9 10, on right: 7 8
+Loop (38)
+    on left: 11 12 13, on right: 9
+Proto (39)
+    on left: 14, on right: 3 4
+Type (40)
+    on left: 15 16 17, on right: 14
+Args (41)
+    on left: 18 19 20, on right: 14 18
+TypeArg (42)
+    on left: 21 22 23, on right: 18 19 32
+E (43)
+    on left: 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39, on right:
+    10 11 12 13 24 25 26 27 28 29 30 31 32 33
 
 
 State 0
 
     0 $accept: . Program $end
 
-    int_token     shift, and go to state 1
-    double_token  shift, and go to state 2
-    char_token    shift, and go to state 3
+    int_token      shift, and go to state 1
+    double_token   shift, and go to state 2
+    char_token     shift, and go to state 3
+    include_token  shift, and go to state 4
 
-    Program    go to state 4
-    Statement  go to state 5
-    Proto      go to state 6
-    Type       go to state 7
+    Program    go to state 5
+    Statement  go to state 6
+    Proto      go to state 7
+    Type       go to state 8
 
 
 State 1
 
-   12 Type: int_token .
+   15 Type: int_token .
 
-    $default  reduce using rule 12 (Type)
+    $default  reduce using rule 15 (Type)
 
 
 State 2
 
-   14 Type: double_token .
+   17 Type: double_token .
 
-    $default  reduce using rule 14 (Type)
+    $default  reduce using rule 17 (Type)
 
 
 State 3
 
-   13 Type: char_token .
+   16 Type: char_token .
 
-    $default  reduce using rule 13 (Type)
+    $default  reduce using rule 16 (Type)
 
 
 State 4
 
-    0 $accept: Program . $end
-    1 Program: Program . Statement
+    5 Statement: include_token . ppd_token
+    6          | include_token . string_token
 
-    $end          shift, and go to state 8
-    int_token     shift, and go to state 1
-    double_token  shift, and go to state 2
-    char_token    shift, and go to state 3
-
-    Statement  go to state 9
-    Proto      go to state 6
-    Type       go to state 7
+    ppd_token     shift, and go to state 9
+    string_token  shift, and go to state 10
 
 
 State 5
+
+    0 $accept: Program . $end
+    1 Program: Program . Statement
+
+    $end           shift, and go to state 11
+    int_token      shift, and go to state 1
+    double_token   shift, and go to state 2
+    char_token     shift, and go to state 3
+    include_token  shift, and go to state 4
+
+    Statement  go to state 12
+    Proto      go to state 7
+    Type       go to state 8
+
+
+State 6
 
     2 Program: Statement .
 
     $default  reduce using rule 2 (Program)
 
 
-State 6
-
-    3 Statement: Proto . '{' Block '}'
-
-    '{'  shift, and go to state 10
-
-
 State 7
 
-   11 Proto: Type . id_token '(' Args ')'
+    3 Statement: Proto . '{' Block '}'
+    4          | Proto . ';'
 
-    id_token  shift, and go to state 11
+    '{'  shift, and go to state 13
+    ';'  shift, and go to state 14
 
 
 State 8
+
+   14 Proto: Type . id_token '(' Args ')'
+
+    id_token  shift, and go to state 15
+
+
+State 9
+
+    5 Statement: include_token ppd_token .
+
+    $default  reduce using rule 5 (Statement)
+
+
+State 10
+
+    6 Statement: include_token string_token .
+
+    $default  reduce using rule 6 (Statement)
+
+
+State 11
 
     0 $accept: Program $end .
 
     $default  accept
 
 
-State 9
+State 12
 
     1 Program: Program Statement .
 
     $default  reduce using rule 1 (Program)
 
 
-State 10
+State 13
 
     3 Statement: Proto '{' . Block '}'
 
-    if_token      shift, and go to state 12
-    while_token   shift, and go to state 13
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
+    if_token      shift, and go to state 16
+    while_token   shift, and go to state 17
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
 
-    $default  reduce using rule 36 (E)
+    $default  reduce using rule 39 (E)
 
-    Block      go to state 22
-    Loop_or_E  go to state 23
-    Loop       go to state 24
-    TypeArg    go to state 25
-    E          go to state 26
-
-
-State 11
-
-   11 Proto: Type id_token . '(' Args ')'
-
-    '('  shift, and go to state 27
-
-
-State 12
-
-    8 Loop: if_token . '(' E ')' '{' Block '}' else_token '{' Block '}'
-    9     | if_token . '(' E ')' '{' Block '}'
-
-    '('  shift, and go to state 28
-
-
-State 13
-
-   10 Loop: while_token . '(' E ')' '{' Block '}'
-
-    '('  shift, and go to state 29
+    Block      go to state 26
+    Loop_or_E  go to state 27
+    Loop       go to state 28
+    TypeArg    go to state 29
+    E          go to state 30
 
 
 State 14
 
-   19 TypeArg: int_token . id_token
+    4 Statement: Proto ';' .
 
-    id_token  shift, and go to state 30
+    $default  reduce using rule 4 (Statement)
 
 
 State 15
 
-   18 TypeArg: double_token . id_token
+   14 Proto: Type id_token . '(' Args ')'
 
-    id_token  shift, and go to state 31
+    '('  shift, and go to state 31
 
 
 State 16
 
-   20 TypeArg: char_token . id_token
-   33 E: char_token .
+   11 Loop: if_token . '(' E ')' '{' Block '}' else_token '{' Block '}'
+   12     | if_token . '(' E ')' '{' Block '}'
 
-    id_token  shift, and go to state 32
-
-    $default  reduce using rule 33 (E)
+    '('  shift, and go to state 32
 
 
 State 17
 
-   28 E: id_token . '=' E
-   35  | id_token .
+   13 Loop: while_token . '(' E ')' '{' Block '}'
 
-    '='  shift, and go to state 33
-
-    $default  reduce using rule 35 (E)
+    '('  shift, and go to state 33
 
 
 State 18
 
-   34 E: string_token .
+   22 TypeArg: int_token . id_token
 
-    $default  reduce using rule 34 (E)
+    id_token  shift, and go to state 34
 
 
 State 19
 
-   32 E: d_num_token .
+   21 TypeArg: double_token . id_token
 
-    $default  reduce using rule 32 (E)
+    id_token  shift, and go to state 35
 
 
 State 20
 
-   31 E: i_num_token .
+   23 TypeArg: char_token . id_token
+   36 E: char_token .
 
-    $default  reduce using rule 31 (E)
+    id_token  shift, and go to state 36
+
+    $default  reduce using rule 36 (E)
 
 
 State 21
 
-   30 E: '(' . E ')'
+   31 E: id_token . '=' E
+   38  | id_token .
 
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
+    '='  shift, and go to state 37
 
-    $default  reduce using rule 36 (E)
-
-    TypeArg  go to state 25
-    E        go to state 34
+    $default  reduce using rule 38 (E)
 
 
 State 22
 
-    3 Statement: Proto '{' Block . '}'
-    4 Block: Block . Loop_or_E
+   37 E: string_token .
 
-    if_token      shift, and go to state 12
-    while_token   shift, and go to state 13
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '}'           shift, and go to state 35
-    '('           shift, and go to state 21
-
-    $default  reduce using rule 36 (E)
-
-    Loop_or_E  go to state 36
-    Loop       go to state 24
-    TypeArg    go to state 25
-    E          go to state 26
+    $default  reduce using rule 37 (E)
 
 
 State 23
 
-    5 Block: Loop_or_E .
+   35 E: d_num_token .
 
-    $default  reduce using rule 5 (Block)
+    $default  reduce using rule 35 (E)
 
 
 State 24
 
-    6 Loop_or_E: Loop .
+   34 E: i_num_token .
 
-    $default  reduce using rule 6 (Loop_or_E)
+    $default  reduce using rule 34 (E)
 
 
 State 25
 
-   29 E: TypeArg . '=' E
+   33 E: '(' . E ')'
 
-    '='  shift, and go to state 37
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    TypeArg  go to state 29
+    E        go to state 38
 
 
 State 26
 
-    7 Loop_or_E: E . ';'
-   21 E: E . '+' E
-   22  | E . '-' E
-   23  | E . '*' E
-   24  | E . '/' E
-   25  | E . '>' E
-   26  | E . '<' E
-   27  | E . eq_token E
+    3 Statement: Proto '{' Block . '}'
+    7 Block: Block . Loop_or_E
 
-    eq_token  shift, and go to state 38
-    '<'       shift, and go to state 39
-    '>'       shift, and go to state 40
-    '+'       shift, and go to state 41
-    '-'       shift, and go to state 42
-    '*'       shift, and go to state 43
-    '/'       shift, and go to state 44
-    ';'       shift, and go to state 45
+    if_token      shift, and go to state 16
+    while_token   shift, and go to state 17
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '}'           shift, and go to state 39
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    Loop_or_E  go to state 40
+    Loop       go to state 28
+    TypeArg    go to state 29
+    E          go to state 30
 
 
 State 27
 
-   11 Proto: Type id_token '(' . Args ')'
+    8 Block: Loop_or_E .
 
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 46
-
-    $default  reduce using rule 17 (Args)
-
-    Args     go to state 47
-    TypeArg  go to state 48
+    $default  reduce using rule 8 (Block)
 
 
 State 28
 
-    8 Loop: if_token '(' . E ')' '{' Block '}' else_token '{' Block '}'
-    9     | if_token '(' . E ')' '{' Block '}'
+    9 Loop_or_E: Loop .
 
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
-
-    $default  reduce using rule 36 (E)
-
-    TypeArg  go to state 25
-    E        go to state 49
+    $default  reduce using rule 9 (Loop_or_E)
 
 
 State 29
 
-   10 Loop: while_token '(' . E ')' '{' Block '}'
+   32 E: TypeArg . '=' E
 
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
-
-    $default  reduce using rule 36 (E)
-
-    TypeArg  go to state 25
-    E        go to state 50
+    '='  shift, and go to state 41
 
 
 State 30
 
-   19 TypeArg: int_token id_token .
+   10 Loop_or_E: E . ';'
+   24 E: E . '+' E
+   25  | E . '-' E
+   26  | E . '*' E
+   27  | E . '/' E
+   28  | E . '>' E
+   29  | E . '<' E
+   30  | E . eq_token E
 
-    $default  reduce using rule 19 (TypeArg)
+    eq_token  shift, and go to state 42
+    '<'       shift, and go to state 43
+    '>'       shift, and go to state 44
+    '+'       shift, and go to state 45
+    '-'       shift, and go to state 46
+    '*'       shift, and go to state 47
+    '/'       shift, and go to state 48
+    ';'       shift, and go to state 49
 
 
 State 31
 
-   18 TypeArg: double_token id_token .
+   14 Proto: Type id_token '(' . Args ')'
 
-    $default  reduce using rule 18 (TypeArg)
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 50
+
+    $default  reduce using rule 20 (Args)
+
+    Args     go to state 51
+    TypeArg  go to state 52
 
 
 State 32
 
-   20 TypeArg: char_token id_token .
+   11 Loop: if_token '(' . E ')' '{' Block '}' else_token '{' Block '}'
+   12     | if_token '(' . E ')' '{' Block '}'
 
-    $default  reduce using rule 20 (TypeArg)
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    TypeArg  go to state 29
+    E        go to state 53
 
 
 State 33
 
-   28 E: id_token '=' . E
+   13 Loop: while_token '(' . E ')' '{' Block '}'
 
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
 
-    $default  reduce using rule 36 (E)
+    $default  reduce using rule 39 (E)
 
-    TypeArg  go to state 25
-    E        go to state 51
+    TypeArg  go to state 29
+    E        go to state 54
 
 
 State 34
 
-   21 E: E . '+' E
-   22  | E . '-' E
-   23  | E . '*' E
-   24  | E . '/' E
-   25  | E . '>' E
-   26  | E . '<' E
-   27  | E . eq_token E
-   30  | '(' E . ')'
+   22 TypeArg: int_token id_token .
 
-    eq_token  shift, and go to state 38
-    '<'       shift, and go to state 39
-    '>'       shift, and go to state 40
-    '+'       shift, and go to state 41
-    '-'       shift, and go to state 42
-    '*'       shift, and go to state 43
-    '/'       shift, and go to state 44
-    ')'       shift, and go to state 52
+    $default  reduce using rule 22 (TypeArg)
 
 
 State 35
+
+   21 TypeArg: double_token id_token .
+
+    $default  reduce using rule 21 (TypeArg)
+
+
+State 36
+
+   23 TypeArg: char_token id_token .
+
+    $default  reduce using rule 23 (TypeArg)
+
+
+State 37
+
+   31 E: id_token '=' . E
+
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    TypeArg  go to state 29
+    E        go to state 55
+
+
+State 38
+
+   24 E: E . '+' E
+   25  | E . '-' E
+   26  | E . '*' E
+   27  | E . '/' E
+   28  | E . '>' E
+   29  | E . '<' E
+   30  | E . eq_token E
+   33  | '(' E . ')'
+
+    eq_token  shift, and go to state 42
+    '<'       shift, and go to state 43
+    '>'       shift, and go to state 44
+    '+'       shift, and go to state 45
+    '-'       shift, and go to state 46
+    '*'       shift, and go to state 47
+    '/'       shift, and go to state 48
+    ')'       shift, and go to state 56
+
+
+State 39
 
     3 Statement: Proto '{' Block '}' .
 
     $default  reduce using rule 3 (Statement)
 
 
-State 36
-
-    4 Block: Block Loop_or_E .
-
-    $default  reduce using rule 4 (Block)
-
-
-State 37
-
-   29 E: TypeArg '=' . E
-
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
-
-    $default  reduce using rule 36 (E)
-
-    TypeArg  go to state 25
-    E        go to state 53
-
-
-State 38
-
-   27 E: E eq_token . E
-
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
-
-    $default  reduce using rule 36 (E)
-
-    TypeArg  go to state 25
-    E        go to state 54
-
-
-State 39
-
-   26 E: E '<' . E
-
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
-
-    $default  reduce using rule 36 (E)
-
-    TypeArg  go to state 25
-    E        go to state 55
-
-
 State 40
 
-   25 E: E '>' . E
+    7 Block: Block Loop_or_E .
 
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
-
-    $default  reduce using rule 36 (E)
-
-    TypeArg  go to state 25
-    E        go to state 56
+    $default  reduce using rule 7 (Block)
 
 
 State 41
 
-   21 E: E '+' . E
+   32 E: TypeArg '=' . E
 
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
 
-    $default  reduce using rule 36 (E)
+    $default  reduce using rule 39 (E)
 
-    TypeArg  go to state 25
+    TypeArg  go to state 29
     E        go to state 57
 
 
 State 42
 
-   22 E: E '-' . E
+   30 E: E eq_token . E
 
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
 
-    $default  reduce using rule 36 (E)
+    $default  reduce using rule 39 (E)
 
-    TypeArg  go to state 25
+    TypeArg  go to state 29
     E        go to state 58
 
 
 State 43
 
-   23 E: E '*' . E
+   29 E: E '<' . E
 
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
 
-    $default  reduce using rule 36 (E)
+    $default  reduce using rule 39 (E)
 
-    TypeArg  go to state 25
+    TypeArg  go to state 29
     E        go to state 59
 
 
 State 44
 
-   24 E: E '/' . E
+   28 E: E '>' . E
 
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
 
-    $default  reduce using rule 36 (E)
+    $default  reduce using rule 39 (E)
 
-    TypeArg  go to state 25
+    TypeArg  go to state 29
     E        go to state 60
 
 
 State 45
 
-    7 Loop_or_E: E ';' .
+   24 E: E '+' . E
 
-    $default  reduce using rule 7 (Loop_or_E)
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    TypeArg  go to state 29
+    E        go to state 61
 
 
 State 46
 
-   20 TypeArg: char_token . id_token
+   25 E: E '-' . E
 
-    id_token  shift, and go to state 32
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    TypeArg  go to state 29
+    E        go to state 62
 
 
 State 47
 
-   11 Proto: Type id_token '(' Args . ')'
-   15 Args: Args . ',' TypeArg
+   26 E: E '*' . E
 
-    ')'  shift, and go to state 61
-    ','  shift, and go to state 62
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    TypeArg  go to state 29
+    E        go to state 63
 
 
 State 48
 
-   16 Args: TypeArg .
+   27 E: E '/' . E
 
-    $default  reduce using rule 16 (Args)
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    TypeArg  go to state 29
+    E        go to state 64
 
 
 State 49
 
-    8 Loop: if_token '(' E . ')' '{' Block '}' else_token '{' Block '}'
-    9     | if_token '(' E . ')' '{' Block '}'
-   21 E: E . '+' E
-   22  | E . '-' E
-   23  | E . '*' E
-   24  | E . '/' E
-   25  | E . '>' E
-   26  | E . '<' E
-   27  | E . eq_token E
+   10 Loop_or_E: E ';' .
 
-    eq_token  shift, and go to state 38
-    '<'       shift, and go to state 39
-    '>'       shift, and go to state 40
-    '+'       shift, and go to state 41
-    '-'       shift, and go to state 42
-    '*'       shift, and go to state 43
-    '/'       shift, and go to state 44
-    ')'       shift, and go to state 63
+    $default  reduce using rule 10 (Loop_or_E)
 
 
 State 50
 
-   10 Loop: while_token '(' E . ')' '{' Block '}'
-   21 E: E . '+' E
-   22  | E . '-' E
-   23  | E . '*' E
-   24  | E . '/' E
-   25  | E . '>' E
-   26  | E . '<' E
-   27  | E . eq_token E
+   23 TypeArg: char_token . id_token
 
-    eq_token  shift, and go to state 38
-    '<'       shift, and go to state 39
-    '>'       shift, and go to state 40
-    '+'       shift, and go to state 41
-    '-'       shift, and go to state 42
-    '*'       shift, and go to state 43
-    '/'       shift, and go to state 44
-    ')'       shift, and go to state 64
+    id_token  shift, and go to state 36
 
 
 State 51
 
-   21 E: E . '+' E
-   22  | E . '-' E
-   23  | E . '*' E
-   24  | E . '/' E
-   25  | E . '>' E
-   26  | E . '<' E
-   27  | E . eq_token E
-   28  | id_token '=' E .
+   14 Proto: Type id_token '(' Args . ')'
+   18 Args: Args . ',' TypeArg
 
-    eq_token  shift, and go to state 38
-    '<'       shift, and go to state 39
-    '>'       shift, and go to state 40
-    '+'       shift, and go to state 41
-    '-'       shift, and go to state 42
-    '*'       shift, and go to state 43
-    '/'       shift, and go to state 44
-
-    $default  reduce using rule 28 (E)
+    ')'  shift, and go to state 65
+    ','  shift, and go to state 66
 
 
 State 52
 
-   30 E: '(' E ')' .
+   19 Args: TypeArg .
 
-    $default  reduce using rule 30 (E)
+    $default  reduce using rule 19 (Args)
 
 
 State 53
 
-   21 E: E . '+' E
-   22  | E . '-' E
-   23  | E . '*' E
-   24  | E . '/' E
-   25  | E . '>' E
-   26  | E . '<' E
-   27  | E . eq_token E
-   29  | TypeArg '=' E .
+   11 Loop: if_token '(' E . ')' '{' Block '}' else_token '{' Block '}'
+   12     | if_token '(' E . ')' '{' Block '}'
+   24 E: E . '+' E
+   25  | E . '-' E
+   26  | E . '*' E
+   27  | E . '/' E
+   28  | E . '>' E
+   29  | E . '<' E
+   30  | E . eq_token E
 
-    eq_token  shift, and go to state 38
-    '<'       shift, and go to state 39
-    '>'       shift, and go to state 40
-    '+'       shift, and go to state 41
-    '-'       shift, and go to state 42
-    '*'       shift, and go to state 43
-    '/'       shift, and go to state 44
-
-    $default  reduce using rule 29 (E)
+    eq_token  shift, and go to state 42
+    '<'       shift, and go to state 43
+    '>'       shift, and go to state 44
+    '+'       shift, and go to state 45
+    '-'       shift, and go to state 46
+    '*'       shift, and go to state 47
+    '/'       shift, and go to state 48
+    ')'       shift, and go to state 67
 
 
 State 54
 
-   21 E: E . '+' E
-   22  | E . '-' E
-   23  | E . '*' E
-   24  | E . '/' E
-   25  | E . '>' E
-   26  | E . '<' E
-   27  | E . eq_token E
-   27  | E eq_token E .
+   13 Loop: while_token '(' E . ')' '{' Block '}'
+   24 E: E . '+' E
+   25  | E . '-' E
+   26  | E . '*' E
+   27  | E . '/' E
+   28  | E . '>' E
+   29  | E . '<' E
+   30  | E . eq_token E
 
-    '+'  shift, and go to state 41
-    '-'  shift, and go to state 42
-    '*'  shift, and go to state 43
-    '/'  shift, and go to state 44
-
-    $default  reduce using rule 27 (E)
+    eq_token  shift, and go to state 42
+    '<'       shift, and go to state 43
+    '>'       shift, and go to state 44
+    '+'       shift, and go to state 45
+    '-'       shift, and go to state 46
+    '*'       shift, and go to state 47
+    '/'       shift, and go to state 48
+    ')'       shift, and go to state 68
 
 
 State 55
 
-   21 E: E . '+' E
-   22  | E . '-' E
-   23  | E . '*' E
-   24  | E . '/' E
-   25  | E . '>' E
-   26  | E . '<' E
-   26  | E '<' E .
-   27  | E . eq_token E
+   24 E: E . '+' E
+   25  | E . '-' E
+   26  | E . '*' E
+   27  | E . '/' E
+   28  | E . '>' E
+   29  | E . '<' E
+   30  | E . eq_token E
+   31  | id_token '=' E .
 
-    '+'  shift, and go to state 41
-    '-'  shift, and go to state 42
-    '*'  shift, and go to state 43
-    '/'  shift, and go to state 44
+    eq_token  shift, and go to state 42
+    '<'       shift, and go to state 43
+    '>'       shift, and go to state 44
+    '+'       shift, and go to state 45
+    '-'       shift, and go to state 46
+    '*'       shift, and go to state 47
+    '/'       shift, and go to state 48
 
-    $default  reduce using rule 26 (E)
+    $default  reduce using rule 31 (E)
 
 
 State 56
 
-   21 E: E . '+' E
-   22  | E . '-' E
-   23  | E . '*' E
-   24  | E . '/' E
-   25  | E . '>' E
-   25  | E '>' E .
-   26  | E . '<' E
-   27  | E . eq_token E
+   33 E: '(' E ')' .
 
-    '+'  shift, and go to state 41
-    '-'  shift, and go to state 42
-    '*'  shift, and go to state 43
-    '/'  shift, and go to state 44
-
-    $default  reduce using rule 25 (E)
+    $default  reduce using rule 33 (E)
 
 
 State 57
 
-   21 E: E . '+' E
-   21  | E '+' E .
-   22  | E . '-' E
-   23  | E . '*' E
-   24  | E . '/' E
-   25  | E . '>' E
-   26  | E . '<' E
-   27  | E . eq_token E
+   24 E: E . '+' E
+   25  | E . '-' E
+   26  | E . '*' E
+   27  | E . '/' E
+   28  | E . '>' E
+   29  | E . '<' E
+   30  | E . eq_token E
+   32  | TypeArg '=' E .
 
-    '*'  shift, and go to state 43
-    '/'  shift, and go to state 44
+    eq_token  shift, and go to state 42
+    '<'       shift, and go to state 43
+    '>'       shift, and go to state 44
+    '+'       shift, and go to state 45
+    '-'       shift, and go to state 46
+    '*'       shift, and go to state 47
+    '/'       shift, and go to state 48
 
-    $default  reduce using rule 21 (E)
+    $default  reduce using rule 32 (E)
 
 
 State 58
 
-   21 E: E . '+' E
-   22  | E . '-' E
-   22  | E '-' E .
-   23  | E . '*' E
-   24  | E . '/' E
-   25  | E . '>' E
-   26  | E . '<' E
-   27  | E . eq_token E
+   24 E: E . '+' E
+   25  | E . '-' E
+   26  | E . '*' E
+   27  | E . '/' E
+   28  | E . '>' E
+   29  | E . '<' E
+   30  | E . eq_token E
+   30  | E eq_token E .
 
-    '*'  shift, and go to state 43
-    '/'  shift, and go to state 44
+    '+'  shift, and go to state 45
+    '-'  shift, and go to state 46
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
 
-    $default  reduce using rule 22 (E)
+    $default  reduce using rule 30 (E)
 
 
 State 59
 
-   21 E: E . '+' E
-   22  | E . '-' E
-   23  | E . '*' E
-   23  | E '*' E .
-   24  | E . '/' E
-   25  | E . '>' E
-   26  | E . '<' E
-   27  | E . eq_token E
+   24 E: E . '+' E
+   25  | E . '-' E
+   26  | E . '*' E
+   27  | E . '/' E
+   28  | E . '>' E
+   29  | E . '<' E
+   29  | E '<' E .
+   30  | E . eq_token E
 
-    $default  reduce using rule 23 (E)
+    '+'  shift, and go to state 45
+    '-'  shift, and go to state 46
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
+
+    $default  reduce using rule 29 (E)
 
 
 State 60
 
-   21 E: E . '+' E
-   22  | E . '-' E
-   23  | E . '*' E
-   24  | E . '/' E
-   24  | E '/' E .
-   25  | E . '>' E
-   26  | E . '<' E
-   27  | E . eq_token E
+   24 E: E . '+' E
+   25  | E . '-' E
+   26  | E . '*' E
+   27  | E . '/' E
+   28  | E . '>' E
+   28  | E '>' E .
+   29  | E . '<' E
+   30  | E . eq_token E
 
-    $default  reduce using rule 24 (E)
+    '+'  shift, and go to state 45
+    '-'  shift, and go to state 46
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
+
+    $default  reduce using rule 28 (E)
 
 
 State 61
 
-   11 Proto: Type id_token '(' Args ')' .
+   24 E: E . '+' E
+   24  | E '+' E .
+   25  | E . '-' E
+   26  | E . '*' E
+   27  | E . '/' E
+   28  | E . '>' E
+   29  | E . '<' E
+   30  | E . eq_token E
 
-    $default  reduce using rule 11 (Proto)
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
+
+    $default  reduce using rule 24 (E)
 
 
 State 62
 
-   15 Args: Args ',' . TypeArg
+   24 E: E . '+' E
+   25  | E . '-' E
+   25  | E '-' E .
+   26  | E . '*' E
+   27  | E . '/' E
+   28  | E . '>' E
+   29  | E . '<' E
+   30  | E . eq_token E
 
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 46
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
 
-    TypeArg  go to state 65
+    $default  reduce using rule 25 (E)
 
 
 State 63
 
-    8 Loop: if_token '(' E ')' . '{' Block '}' else_token '{' Block '}'
-    9     | if_token '(' E ')' . '{' Block '}'
+   24 E: E . '+' E
+   25  | E . '-' E
+   26  | E . '*' E
+   26  | E '*' E .
+   27  | E . '/' E
+   28  | E . '>' E
+   29  | E . '<' E
+   30  | E . eq_token E
 
-    '{'  shift, and go to state 66
+    $default  reduce using rule 26 (E)
 
 
 State 64
 
-   10 Loop: while_token '(' E ')' . '{' Block '}'
+   24 E: E . '+' E
+   25  | E . '-' E
+   26  | E . '*' E
+   27  | E . '/' E
+   27  | E '/' E .
+   28  | E . '>' E
+   29  | E . '<' E
+   30  | E . eq_token E
 
-    '{'  shift, and go to state 67
+    $default  reduce using rule 27 (E)
 
 
 State 65
 
-   15 Args: Args ',' TypeArg .
+   14 Proto: Type id_token '(' Args ')' .
 
-    $default  reduce using rule 15 (Args)
+    $default  reduce using rule 14 (Proto)
 
 
 State 66
 
-    8 Loop: if_token '(' E ')' '{' . Block '}' else_token '{' Block '}'
-    9     | if_token '(' E ')' '{' . Block '}'
+   18 Args: Args ',' . TypeArg
 
-    if_token      shift, and go to state 12
-    while_token   shift, and go to state 13
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 50
 
-    $default  reduce using rule 36 (E)
-
-    Block      go to state 68
-    Loop_or_E  go to state 23
-    Loop       go to state 24
-    TypeArg    go to state 25
-    E          go to state 26
+    TypeArg  go to state 69
 
 
 State 67
 
-   10 Loop: while_token '(' E ')' '{' . Block '}'
+   11 Loop: if_token '(' E ')' . '{' Block '}' else_token '{' Block '}'
+   12     | if_token '(' E ')' . '{' Block '}'
 
-    if_token      shift, and go to state 12
-    while_token   shift, and go to state 13
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
-
-    $default  reduce using rule 36 (E)
-
-    Block      go to state 69
-    Loop_or_E  go to state 23
-    Loop       go to state 24
-    TypeArg    go to state 25
-    E          go to state 26
+    '{'  shift, and go to state 70
 
 
 State 68
 
-    4 Block: Block . Loop_or_E
-    8 Loop: if_token '(' E ')' '{' Block . '}' else_token '{' Block '}'
-    9     | if_token '(' E ')' '{' Block . '}'
+   13 Loop: while_token '(' E ')' . '{' Block '}'
 
-    if_token      shift, and go to state 12
-    while_token   shift, and go to state 13
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '}'           shift, and go to state 70
-    '('           shift, and go to state 21
-
-    $default  reduce using rule 36 (E)
-
-    Loop_or_E  go to state 36
-    Loop       go to state 24
-    TypeArg    go to state 25
-    E          go to state 26
+    '{'  shift, and go to state 71
 
 
 State 69
 
-    4 Block: Block . Loop_or_E
-   10 Loop: while_token '(' E ')' '{' Block . '}'
+   18 Args: Args ',' TypeArg .
 
-    if_token      shift, and go to state 12
-    while_token   shift, and go to state 13
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '}'           shift, and go to state 71
-    '('           shift, and go to state 21
-
-    $default  reduce using rule 36 (E)
-
-    Loop_or_E  go to state 36
-    Loop       go to state 24
-    TypeArg    go to state 25
-    E          go to state 26
+    $default  reduce using rule 18 (Args)
 
 
 State 70
 
-    8 Loop: if_token '(' E ')' '{' Block '}' . else_token '{' Block '}'
-    9     | if_token '(' E ')' '{' Block '}' .
+   11 Loop: if_token '(' E ')' '{' . Block '}' else_token '{' Block '}'
+   12     | if_token '(' E ')' '{' . Block '}'
 
-    else_token  shift, and go to state 72
+    if_token      shift, and go to state 16
+    while_token   shift, and go to state 17
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
 
-    $default  reduce using rule 9 (Loop)
+    $default  reduce using rule 39 (E)
+
+    Block      go to state 72
+    Loop_or_E  go to state 27
+    Loop       go to state 28
+    TypeArg    go to state 29
+    E          go to state 30
 
 
 State 71
 
-   10 Loop: while_token '(' E ')' '{' Block '}' .
+   13 Loop: while_token '(' E ')' '{' . Block '}'
 
-    $default  reduce using rule 10 (Loop)
+    if_token      shift, and go to state 16
+    while_token   shift, and go to state 17
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    Block      go to state 73
+    Loop_or_E  go to state 27
+    Loop       go to state 28
+    TypeArg    go to state 29
+    E          go to state 30
 
 
 State 72
 
-    8 Loop: if_token '(' E ')' '{' Block '}' else_token . '{' Block '}'
+    7 Block: Block . Loop_or_E
+   11 Loop: if_token '(' E ')' '{' Block . '}' else_token '{' Block '}'
+   12     | if_token '(' E ')' '{' Block . '}'
 
-    '{'  shift, and go to state 73
+    if_token      shift, and go to state 16
+    while_token   shift, and go to state 17
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '}'           shift, and go to state 74
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    Loop_or_E  go to state 40
+    Loop       go to state 28
+    TypeArg    go to state 29
+    E          go to state 30
 
 
 State 73
 
-    8 Loop: if_token '(' E ')' '{' Block '}' else_token '{' . Block '}'
+    7 Block: Block . Loop_or_E
+   13 Loop: while_token '(' E ')' '{' Block . '}'
 
-    if_token      shift, and go to state 12
-    while_token   shift, and go to state 13
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '('           shift, and go to state 21
+    if_token      shift, and go to state 16
+    while_token   shift, and go to state 17
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '}'           shift, and go to state 75
+    '('           shift, and go to state 25
 
-    $default  reduce using rule 36 (E)
+    $default  reduce using rule 39 (E)
 
-    Block      go to state 74
-    Loop_or_E  go to state 23
-    Loop       go to state 24
-    TypeArg    go to state 25
-    E          go to state 26
+    Loop_or_E  go to state 40
+    Loop       go to state 28
+    TypeArg    go to state 29
+    E          go to state 30
 
 
 State 74
 
-    4 Block: Block . Loop_or_E
-    8 Loop: if_token '(' E ')' '{' Block '}' else_token '{' Block . '}'
+   11 Loop: if_token '(' E ')' '{' Block '}' . else_token '{' Block '}'
+   12     | if_token '(' E ')' '{' Block '}' .
 
-    if_token      shift, and go to state 12
-    while_token   shift, and go to state 13
-    int_token     shift, and go to state 14
-    double_token  shift, and go to state 15
-    char_token    shift, and go to state 16
-    id_token      shift, and go to state 17
-    string_token  shift, and go to state 18
-    d_num_token   shift, and go to state 19
-    i_num_token   shift, and go to state 20
-    '}'           shift, and go to state 75
-    '('           shift, and go to state 21
+    else_token  shift, and go to state 76
 
-    $default  reduce using rule 36 (E)
-
-    Loop_or_E  go to state 36
-    Loop       go to state 24
-    TypeArg    go to state 25
-    E          go to state 26
+    $default  reduce using rule 12 (Loop)
 
 
 State 75
 
-    8 Loop: if_token '(' E ')' '{' Block '}' else_token '{' Block '}' .
+   13 Loop: while_token '(' E ')' '{' Block '}' .
 
-    $default  reduce using rule 8 (Loop)
+    $default  reduce using rule 13 (Loop)
+
+
+State 76
+
+   11 Loop: if_token '(' E ')' '{' Block '}' else_token . '{' Block '}'
+
+    '{'  shift, and go to state 77
+
+
+State 77
+
+   11 Loop: if_token '(' E ')' '{' Block '}' else_token '{' . Block '}'
+
+    if_token      shift, and go to state 16
+    while_token   shift, and go to state 17
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    Block      go to state 78
+    Loop_or_E  go to state 27
+    Loop       go to state 28
+    TypeArg    go to state 29
+    E          go to state 30
+
+
+State 78
+
+    7 Block: Block . Loop_or_E
+   11 Loop: if_token '(' E ')' '{' Block '}' else_token '{' Block . '}'
+
+    if_token      shift, and go to state 16
+    while_token   shift, and go to state 17
+    int_token     shift, and go to state 18
+    double_token  shift, and go to state 19
+    char_token    shift, and go to state 20
+    id_token      shift, and go to state 21
+    string_token  shift, and go to state 22
+    d_num_token   shift, and go to state 23
+    i_num_token   shift, and go to state 24
+    '}'           shift, and go to state 79
+    '('           shift, and go to state 25
+
+    $default  reduce using rule 39 (E)
+
+    Loop_or_E  go to state 40
+    Loop       go to state 28
+    TypeArg    go to state 29
+    E          go to state 30
+
+
+State 79
+
+   11 Loop: if_token '(' E ')' '{' Block '}' else_token '{' Block '}' .
+
+    $default  reduce using rule 11 (Loop)

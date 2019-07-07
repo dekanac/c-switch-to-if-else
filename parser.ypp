@@ -24,7 +24,7 @@ void yyerror(std::string s) {
 
 %token if_token else_token while_token for_token switch_token
 case_token int_token double_token char_token default_token eq_token
-
+include_token ppd_token
 %token <s> id_token string_token
 %token <d> d_num_token
 %token <i> i_num_token
@@ -43,9 +43,12 @@ Program: Program Statement
     ;
 
 Statement: Proto '{' Block '}'
+    | Proto ';'
+    | include_token ppd_token
+    | include_token string_token
     ;
 
-Block: Block Loop_or_E  {//ne moze vako 
+Block: Block Loop_or_E  {
     }
     | Loop_or_E 
     ;
@@ -97,9 +100,21 @@ E:    E '+' E
 
 %%
 
+extern Module* TheModule;
+extern LLVMContext TheContext;
+extern legacy::FunctionPassManager* TheFPM;
+
+
 int main(int argc, char **argv) {
     
-    
+    TheModule = new Module("swi2else", TheContext);
+    //TheFPM = new legacy::FunctionPassManager(TheModule);
+
+
     yyparse();
+
+    TheModule->print(outs(), nullptr);
+    delete TheModule;
+    //delete TheFPM;
     return 0;
 }

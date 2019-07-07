@@ -17,6 +17,7 @@
 ID  [a-zA-Z][a-zA-Z0-9_]*
 
 %%
+#include         { return include_token; }
 int              { return int_token; }
 double           { return double_token; }
 char             { return char_token; }
@@ -32,6 +33,7 @@ while            { return while_token; }
 [@<>,+/*();:=!$|'\[\]{}-]      { return *yytext; }
 {ID}             { yylval.s = new std::string(yytext); return id_token; }
 
+\<.*\>           { yylval.s = new std::string(yytext); return ppd_token; }
 \".*\"           { yylval.s = new std::string(yytext); return string_token; }
 [0-9]+           { yylval.i = atoi(yytext); return i_num_token; }
 ([0-9]+\.[0-9]+) { yylval.d = atof(yytext); return d_num_token; }

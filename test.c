@@ -1,3 +1,11 @@
+#include <stdio.h>
+#include "header.hpp"
+
+int prototype_of_function(char a1, char a2);
+int some_function(int a, char b) {
+    a = 20;
+}
+
 int main() {
     int a = 23;
     char b = "This is a string no 1.";
