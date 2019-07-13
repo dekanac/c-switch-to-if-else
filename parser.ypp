@@ -8,6 +8,11 @@
 
 extern int yylex();
 
+extern Module* TheModule;
+extern LLVMContext TheContext;
+extern legacy::FunctionPassManager* TheFPM;
+
+
 void yyerror(std::string s) {
     std::cerr << s << std::endl;
     exit(EXIT_FAILURE);
@@ -16,9 +21,17 @@ void yyerror(std::string s) {
 %}
 
 %union {
+    ExprAST* e;
     double d;
     int i;
     std::string *s;
+    std::vector<std::string> *vec;
+    std::vector<ExprAST*> *vec_e;
+    std::vector<TypeAST*> *vec_t;
+    PrototypeAST *p;
+    TypeAST *t;
+    Type *type;
+
 }
 
 
@@ -29,8 +42,18 @@ include_token ppd_token
 %token <d> d_num_token
 %token <i> i_num_token
 
-%right '='
+%type <type> Type
+%type <e> E Loop_or_E Loop
+%type <vec> ArrOfInits
+%type <vec_e> Block
+%type <t> TypeArg
+%type <p> Proto
+%type <vec_t> Args
+
+
+
 %nonassoc else_token
+%right '='
 %left '<' '>' eq_token
 %left '+' '-'
 %left '*' '/'
@@ -42,15 +65,31 @@ Program: Program Statement
     |    Statement
     ;
 
-Statement: Proto '{' Block '}'
-    | Proto ';'
+Statement: Proto '{' Block '}' {
+        BlockAST *block = new BlockAST(*$3);
+        delete $3;
+
+        FunctionAST* f = new FunctionAST($1, block);
+
+        f->codegen();
+        delete f;
+    }
+    | Proto ';' {
+        $1->codegen();
+        delete $1;
+    }
     | include_token ppd_token
     | include_token string_token
     ;
 
 Block: Block Loop_or_E  {
+        $$ = $1;
+        $$->push_back($2);
     }
-    | Loop_or_E 
+    | Loop_or_E {
+        $$ = new std::vector<ExprAST*>();
+        $$->push_back($1);
+    }
     ;
 
 Loop_or_E: Loop
@@ -62,54 +101,67 @@ Loop: if_token '(' E ')' '{' Block '}' else_token '{' Block '}'
     | while_token '(' E ')' '{' Block '}'
     ;
 
-Proto: Type id_token '(' Args ')'
+Proto: Type id_token '(' Args ')' {
+    $$ = new PrototypeAST($1, *$2, *$4);
+    delete $2;
+    delete $4;
+}
     ;
 
-Type: int_token
-    | char_token
-    | double_token
+Type: int_token     { $$ = Type::getInt32Ty(TheContext); }
+    | char_token    {}
+    | double_token  { $$ = Type::getDoubleTy(TheContext); }
     ;
 
-Args: Args ',' TypeArg
-    | TypeArg
-    |
+Args: Args ',' TypeArg  { $$ = $1; $$->push_back($3); }
+    | TypeArg           { $$ = new std::vector<TypeAST*>(); $$->push_back($1); }
+    |                   { $$ = new std::vector<TypeAST*>(); }
     ;
 
-TypeArg: double_token id_token
-    |    int_token id_token
+TypeArg: double_token id_token  { $$ = new TypeAST(Type::getDoubleTy(TheContext), *$2); delete $2; }
+    |    int_token id_token     { $$ = new TypeAST(Type::getInt32Ty(TheContext), *$2); delete $2; }
     |    char_token id_token
     ;
 
-E:    E '+' E
-    | E '-' E
-    | E '*' E
-    | E '/' E
-    | E '>' E
-    | E '<' E
-    | E eq_token E
-    | id_token '=' E
-    | TypeArg '=' E
-    | '(' E ')'
-    | i_num_token
-    | d_num_token
-    | char_token
-    | string_token
-    | id_token
-    |
+E:    E '+' E           { $$ = new AddExprAST($1, $3); }
+    | E '-' E           { $$ = new SubExprAST($1, $3); }
+    | E '*' E           { $$ = new MulExprAST($1, $3); }
+    | E '/' E           { $$ = new DivExprAST($1, $3); }
+    | E '>' E           { $$ = new GtExprAST($1, $3); }
+    | E '<' E           { $$ = new LtExprAST($1, $3); }
+    | E eq_token E      { $$ = new EqExprAST($1, $3); }
+    | id_token '=' E    { $$ = new AssignExprAST(*$1, $3); delete $1;}
+    | Type id_token '=' E { 
+        $$ = nullptr;
+    }
+    | Type ArrOfInits   { $$ = new DeclExprAST($1, *$2); delete $2; }
+    | '(' E ')'         { $$ = $2; }
+    | i_num_token       { $$ = new IntNumberExprAST($1); }
+    | d_num_token       { $$ = new DoubleNumberExprAST($1); }
+    | char_token        {}
+    | string_token      {}
+    | id_token          { /*$$ = new VariableExprAST(*$1); delete $1;*/ }
     ;
+
+ArrOfInits: ArrOfInits ',' id_token {
+        $$ = $1;
+        $$->push_back(*$3);
+        delete $3;
+    }
+    | id_token {
+        $$ = new std::vector<std::string>();
+        $$->push_back(*$1);
+        delete $1;
+    }
 
 %%
 
-extern Module* TheModule;
-extern LLVMContext TheContext;
-extern legacy::FunctionPassManager* TheFPM;
 
 
 int main(int argc, char **argv) {
     
     TheModule = new Module("swi2else", TheContext);
     //TheFPM = new legacy::FunctionPassManager(TheModule);
-
 
     yyparse();
 

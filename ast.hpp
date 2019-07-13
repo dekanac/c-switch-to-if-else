@@ -1,6 +1,9 @@
 #ifndef __AST_HPP__
 #define __AST_HPP__ 1
 
+#include <iostream>
+#include <vector>
+#include <string>
 #include "llvm/IR/Value.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/IRBuilder.h"
@@ -15,190 +18,196 @@
 
 using namespace llvm;
 using namespace llvm::legacy;
-
-#include <string>
-#include <vector>
 using namespace std;
+
+enum PrimType { T_INT, T_DOUBLE, T_CHAR, T_STRING };
 
 class ExprAST {
 public:
-  virtual Value* codegen() const = 0;
-  virtual ~ExprAST() {
-
-  }
+  	virtual Value* codegen() const = 0;
+  	virtual ~ExprAST() {}
 };
 
-class NumberExprAST : public ExprAST {
+
+
+class IntNumberExprAST : public ExprAST {
 public:
-  NumberExprAST(double v)
-    :Val(v)
-  {}
-  Value* codegen() const;
+	IntNumberExprAST(int v)
+		:Val(v)
+	{}
+	Value* codegen() const;
 private:
-  double Val;
+	int Val;
 };
 
-class VariableExprAST : public ExprAST {
+class DoubleNumberExprAST : public ExprAST {
 public:
-  VariableExprAST(const string &n)
-    :Name(n)
-  {}
-  Value* codegen() const;
+	DoubleNumberExprAST(double v)
+		:Val(v)
+	{}
+	Value* codegen() const;
 private:
-  string Name;
+	double Val;
 };
 
 class InnerExprAST : public ExprAST {
 public:
-  InnerExprAST(const vector<ExprAST*> &v)
-    :Vec(v)
-  {}
-  InnerExprAST(ExprAST* e1);
-  InnerExprAST(ExprAST* e1, ExprAST* e2);
-  InnerExprAST(ExprAST* e1, ExprAST* e2, ExprAST* e3);
-  InnerExprAST(ExprAST* e1, ExprAST* e2, ExprAST* e3, ExprAST* e4);
-  ~InnerExprAST();
+	InnerExprAST(const vector<ExprAST*> &v)
+		:Vec(v)
+	{}
+	InnerExprAST(ExprAST* e1);
+	InnerExprAST(ExprAST* e1, ExprAST* e2);
+	InnerExprAST(ExprAST* e1, ExprAST* e2, ExprAST* e3);
+	InnerExprAST(ExprAST* e1, ExprAST* e2, ExprAST* e3, ExprAST* e4);
+	~InnerExprAST();
 private:
-  InnerExprAST(const InnerExprAST&);
-  InnerExprAST& operator=(const InnerExprAST&);
+	InnerExprAST(const InnerExprAST&);
+	InnerExprAST& operator=(const InnerExprAST&);
 protected:
-  vector<ExprAST*> Vec;
+  	vector<ExprAST*> Vec;
+};
+
+class BlockAST : public InnerExprAST {
+public:
+	BlockAST(vector<ExprAST *> e) : InnerExprAST(e) {}
+	Value *codegen() const;
+
+private:
+	BlockAST(const BlockAST &);
+	BlockAST &operator=(const BlockAST &);
 };
 
 class AddExprAST : public InnerExprAST {
 public:
-  AddExprAST(ExprAST* l, ExprAST *r)
-    :InnerExprAST(l, r)
-  {}
-  Value* codegen() const;
+	AddExprAST(ExprAST* l, ExprAST *r)
+		:InnerExprAST(l, r)
+	{}
+	Value* codegen() const;
 };
 
 class SubExprAST : public InnerExprAST {
 public:
-  SubExprAST(ExprAST* l, ExprAST *r)
-    :InnerExprAST(l, r)
-  {}
-  Value* codegen() const;
+	SubExprAST(ExprAST* l, ExprAST *r)
+		:InnerExprAST(l, r)
+	{}
+	Value* codegen() const;
 };
 
 class MulExprAST : public InnerExprAST {
 public:
-  MulExprAST(ExprAST* l, ExprAST *r)
-    :InnerExprAST(l, r)
-  {}
-  Value* codegen() const;
+	MulExprAST(ExprAST* l, ExprAST *r)
+		:InnerExprAST(l, r)
+	{}
+	Value* codegen() const;
 };
 
 class DivExprAST : public InnerExprAST {
 public:
-  DivExprAST(ExprAST* l, ExprAST *r)
-    :InnerExprAST(l, r)
-  {}
-  Value* codegen() const;
+	DivExprAST(ExprAST* l, ExprAST *r)
+		:InnerExprAST(l, r)
+	{}
+	Value* codegen() const;
 };
 
 class LtExprAST : public InnerExprAST {
 public:
-  LtExprAST(ExprAST* l, ExprAST *r)
-    :InnerExprAST(l, r)
-  {}
-  Value* codegen() const;
+	LtExprAST(ExprAST* l, ExprAST *r)
+		:InnerExprAST(l, r)
+	{}
+	Value* codegen() const;
 };
 
 class GtExprAST : public InnerExprAST {
 public:
-  GtExprAST(ExprAST* l, ExprAST *r)
-    :InnerExprAST(l, r)
-  {}
-  Value* codegen() const;
+	GtExprAST(ExprAST* l, ExprAST *r)
+		:InnerExprAST(l, r)
+	{}
+	Value* codegen() const;
+};
+
+class EqExprAST : public InnerExprAST {
+public:
+	EqExprAST(ExprAST* l, ExprAST *r)
+		:InnerExprAST(l, r)
+	{}
+	Value* codegen() const;
 };
 
 class CallExprAST : public InnerExprAST {
 public:
-  CallExprAST(string c, const vector<ExprAST*> &v)
-    :InnerExprAST(v), Callee(c)
-  { }
-  Value* codegen() const;
+	CallExprAST(string c, const vector<ExprAST*> &v)
+		:InnerExprAST(v), Callee(c)
+	{ }
+	Value* codegen() const;
 private:
-  string Callee;
+  	string Callee;
 };
 
 class IfExprAST : public InnerExprAST {
 public:
-  IfExprAST(ExprAST* cond, ExprAST *e1, ExprAST *e2)
-    :InnerExprAST(cond, e1, e2)
-  {}
-  Value* codegen() const;
-};
-
-class ForExprAST : public InnerExprAST {
-public:
-  ForExprAST(string s, ExprAST *e1, ExprAST *e2, ExprAST *e3, ExprAST *e4)
-    :InnerExprAST(e1, e2, e3, e4), VarName(s)
-  {}
-  Value* codegen() const;
-private:
-  string VarName;
-};
-
-class CExprAST : public InnerExprAST {
-public:
-  CExprAST(ExprAST* e1, ExprAST* e2)
-    :InnerExprAST(e1, e2)
-  {}
-  Value* codegen() const;
+	IfExprAST(ExprAST* cond, ExprAST *e1, ExprAST *e2)
+		:InnerExprAST(cond, e1, e2)
+	{}
+	Value* codegen() const;
 };
 
 class AssignExprAST : public InnerExprAST {
 public:
-  AssignExprAST(string s, ExprAST* e)
-    :InnerExprAST(e), VarName(s)
-  {}
-  Value* codegen() const;
+	AssignExprAST(string s, ExprAST* e)
+		:InnerExprAST(e), VarName(s)
+	{}
+	Value* codegen() const;
 private:
-  string VarName;
+	string VarName;
+	enum PrimType type;
 };
 
-class VarExprAST : public InnerExprAST {
+class TypeAST {
 public:
-  VarExprAST(vector< pair <string, ExprAST*> > v, ExprAST *e)
-    :InnerExprAST(e), Inits(v)
-  {}
-  Value* codegen() const;
+  TypeAST(Type *t, string v) : type(t), str(v) {}
+  ~TypeAST();
+
+  Type *type;
+  std::string str;
+};
+
+class DeclExprAST : public ExprAST {
+public:
+	DeclExprAST(Type *t, std::vector<std::string> v) : Types(t), Vec(v) {}
+	Value *codegen() const;
+
 private:
-  vector< pair <string, ExprAST*> > Inits;
+	Type *Types;
+	vector<string> Vec;
 };
 
 class PrototypeAST {
 public:
-  PrototypeAST(const string &n, const vector<string> &v)
-    :Name(n), Args(v)
-  {}
-  Function* codegen() const;
-  string getName() const {
-    return Name;
-  }
+	PrototypeAST(Type *t, std::string n, std::vector<TypeAST *> a)
+		: Type(t), Name(n), Args(a) {}
+	Function *codegen() const;
+	string getName() const { return Name; }
+
 private:
-  string Name;
-  vector<string> Args;
+	Type *Type;
+	std::string Name;
+	std::vector<TypeAST*> Args;
 };
 
 class FunctionAST {
 public:
-  FunctionAST(PrototypeAST *p, ExprAST *b)
-    :Proto(p), Body(b)
-  {}
-  Function* codegen() const;
-  ~FunctionAST();
+	FunctionAST(PrototypeAST *p, ExprAST *b) : Proto(p), Body(b) {}
+	~FunctionAST();
+	Function *codegen() const;
+
 private:
-  FunctionAST(const FunctionAST&);
-  FunctionAST& operator=(const FunctionAST&);
-  PrototypeAST *Proto;
-  ExprAST *Body;
+	FunctionAST(const FunctionAST &f);
+	FunctionAST &operator=(const FunctionAST &f);
+	PrototypeAST *Proto;
+	ExprAST *Body;
 };
 
-AllocaInst *CreateEntryBlockAlloca(Function *TheFunction,
-				   const string &VarName);
+AllocaInst *CreateEntryBlockAlloca(Type *type, Function *TheFunction, const string &VarName);
 
 #endif
 
