@@ -16,6 +16,13 @@ Value* DoubleNumberExprAST::codegen() const {
   	return ConstantFP::get(TheContext, APFloat(Val));
 }
 
+Value* VariableExprAST::codegen() const {
+	AllocaInst* tmp = NamedValues[Name];
+	if (tmp == nullptr)
+		yyerror("Variable " + Name + " does not exist!");
+	return Builder.CreateLoad(tmp, Name);
+}
+
 //destructors
 
 TypeAST::~TypeAST() {}
@@ -50,20 +57,34 @@ InnerExprAST::InnerExprAST(ExprAST *e1, ExprAST *e2, ExprAST *e3, ExprAST *e4) {
 }
 
 Value *BlockAST::codegen() const {
-	unsigned size = Vec.size() - 1;
-
-	for (unsigned i = 0; i < size; i++)
-		Vec[i]->codegen();
-
-	return Vec[size]->codegen();
+    
+    Value *tmp = nullptr;
+    for(auto i: Vec){
+        tmp = i->codegen();
+        if(tmp == nullptr)
+            yyerror("Codegen err");
+    }
+    return tmp;
 }
 
 Value* AddExprAST::codegen() const {
 	Value *l = Vec[0]->codegen();
 	Value *r = Vec[1]->codegen();
-	if (!l || !r)
+    if (!l || !r)
 		return nullptr;
-	return Builder.CreateFAdd(l, r, "addtmp");
+    
+    Type* typel = l->getType();
+    Type* typer = r->getType();
+    if(typel != typer)
+        yyerror("Types must match!");
+    if(typel == Type::getDoubleTy(TheContext))
+        return Builder.CreateFAdd(l, r, "addtmp");
+    else if(typel == Type::getInt32Ty(TheContext))
+        return Builder.CreateAdd(l, r, "addtmp");
+    else{
+        yyerror("Error matching types!");
+        return nullptr;
+    }
 }
 
 Value* SubExprAST::codegen() const {
@@ -71,7 +92,19 @@ Value* SubExprAST::codegen() const {
 	Value *r = Vec[1]->codegen();
 	if (!l || !r)
 		return nullptr;
-	return Builder.CreateFSub(l, r, "subtmp");
+    
+    Type* typel = l->getType();
+    Type* typer = r->getType();
+    if(typel != typer)
+        yyerror("Types must match!");
+    if(typel == Type::getDoubleTy(TheContext))
+        return Builder.CreateFSub(l, r, "subtmp");
+    else if(typel == Type::getInt32Ty(TheContext))
+        return Builder.CreateSub(l, r, "subtmp");
+    else{
+        yyerror("Error matching types!");
+        return nullptr;
+    }
 }
 
 Value* MulExprAST::codegen() const {
@@ -79,7 +112,19 @@ Value* MulExprAST::codegen() const {
 	Value *r = Vec[1]->codegen();
 	if (!l || !r)
 		return nullptr;
-	return Builder.CreateFMul(l, r, "multmp");
+    
+    Type* typel = l->getType();
+    Type* typer = r->getType();
+    if(typel != typer)
+        yyerror("Types must match!");
+    if(typel == Type::getDoubleTy(TheContext))
+        return Builder.CreateFMul(l, r, "multmp");
+    else if(typel == Type::getInt32Ty(TheContext))
+        return Builder.CreateMul(l, r, "multmp");
+    else{
+        yyerror("Error matching types!");
+        return nullptr;
+    }
 }
 
 Value* DivExprAST::codegen() const {
@@ -87,7 +132,21 @@ Value* DivExprAST::codegen() const {
 	Value *r = Vec[1]->codegen();
 	if (!l || !r)
 		return nullptr;
-	return Builder.CreateFDiv(l, r, "divtmp");
+    
+    Type* typel = l->getType();
+    Type* typer = r->getType();
+    if(typel != typer)
+        yyerror("Types must match!");
+    if(typel == Type::getDoubleTy(TheContext))
+        return Builder.CreateFDiv(l, r, "divtmp");
+    else if(typel == Type::getInt32Ty(TheContext)){
+        yyerror("Can not divide 2 integers!");
+        return nullptr;
+    }
+    else{
+        yyerror("Error matching types!");
+        return nullptr;
+    }
 }
 
 Value* LtExprAST::codegen() const {
@@ -117,32 +176,41 @@ Value* EqExprAST::codegen() const {
     return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
 }
 
-Value *AssignExprAST::codegen() const {
-	std::cout << "Debug pt1" << std::endl;
-	return nullptr;
-//TODO	
+Value* AssignExprAST::codegen() const {
+	Value *Val = Vec[0]->codegen();
+	if (Val == nullptr)
+		return nullptr;
+
+	AllocaInst* alloca = NamedValues[VarName];
+	if (alloca == nullptr)
+		yyerror("Variable " + VarName + " does not exist");
+
+	Builder.CreateStore(Val, alloca);
+	
+	return Val;
 }
 
 Value *DeclExprAST::codegen() const {
 	Function *TheFunction = Builder.GetInsertBlock()->getParent();
 
+	Value *tmp;
 	for (unsigned i = 0; i < Vec.size(); i++) {
 		AllocaInst *Alloca = CreateEntryBlockAlloca(Types, TheFunction, Vec[i]);
 
-		Value *tmp = NULL;
+		tmp = nullptr;
 		if (Types == Type::getDoubleTy(TheContext))
 		tmp = ConstantFP::get(TheContext, APFloat(0.0));
 		if (Types == Type::getInt32Ty(TheContext))
 		tmp = ConstantInt::get(TheContext, APInt(32, 0));
 		//TODO...strings, pointers, chars
-		if (tmp == NULL)
-		return NULL;
-
+		if (tmp == nullptr)
+		return nullptr;
+		
 		NamedValues[Vec[i]] = Alloca;
 		Builder.CreateStore(tmp, Alloca);
 	}
 
-	return NULL;
+	return tmp;
 }
 
 Value* IfExprAST::codegen() const {
@@ -162,7 +230,7 @@ Value* IfExprAST::codegen() const {
     Builder.SetInsertPoint(ThenBB);
     Value* ThenV = Vec[1]->codegen();
     if (ThenV == nullptr)
-      return nullptr;
+    	return nullptr;
     Builder.CreateBr(MergeBB);
     ThenBB = Builder.GetInsertBlock();
 
@@ -170,7 +238,7 @@ Value* IfExprAST::codegen() const {
     Builder.SetInsertPoint(ElseBB);
     Value* ElseV = Vec[2]->codegen();
     if (ElseV == nullptr)
-      return nullptr;
+      	return nullptr;
     Builder.CreateBr(MergeBB);
     ElseBB = Builder.GetInsertBlock();
 
@@ -189,7 +257,6 @@ Function *PrototypeAST::codegen() const {
 	for (unsigned i = 0; i < Args.size(); ++i) {
 		types.push_back(Args[i]->type);
 	}
-	vector<llvm::Type *> Doubles(Args.size(), Type::getDoubleTy(TheContext));
 
 	FunctionType *FT = FunctionType::get(Type, types, false);
 
@@ -198,7 +265,7 @@ Function *PrototypeAST::codegen() const {
 
 	unsigned Idx = 0;
 	for (auto &Arg : F->args())
-		Arg.setName(Args[Idx++]->str);
+		Arg.setName(Args[Idx++]->VarName);
 
 	return F;
 }
@@ -215,7 +282,6 @@ Function *FunctionAST::codegen() const {
   	if (!TheFunction->empty())
     	yyerror("Function redefinition is not allowed " + Proto->getName());
 
-
 	BasicBlock *BB = BasicBlock::Create(TheContext, "entry", TheFunction);
 	Builder.SetInsertPoint(BB);
 
@@ -226,7 +292,8 @@ Function *FunctionAST::codegen() const {
 		NamedValues[Arg.getName()] = Alloca;
 		Builder.CreateStore(&Arg, Alloca);
 	}
-
+    
+	//TODO fix retval
 	if (Value *RetVal = Body->codegen()) {
 		Builder.CreateRet(RetVal);
 		verifyFunction(*TheFunction);
@@ -237,6 +304,22 @@ Function *FunctionAST::codegen() const {
 
 	return NULL;
 }
+
+void TheFpmAndModuleInit(){
+    
+    TheModule = new Module("swi2else", TheContext);
+    TheFPM = new legacy::FunctionPassManager(TheModule);
+    
+    //TheFPM->add(createInstructionCombiningPass());
+    TheFPM->add(createReassociatePass());
+    TheFPM->add(createNewGVNPass());
+    TheFPM->add(createCFGSimplificationPass());
+    //TheFPM->add(createPromoteMemoryToRegisterPass());
+
+    TheFPM->doInitialization();
+    
+}
+
 
 AllocaInst *CreateEntryBlockAlloca(Type *type, Function *TheFunction, const string &VarName) {
   	IRBuilder<> TmpB(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());

@@ -20,6 +20,7 @@ using namespace llvm;
 using namespace llvm::legacy;
 using namespace std;
 
+
 enum PrimType { T_INT, T_DOUBLE, T_CHAR, T_STRING };
 
 class ExprAST {
@@ -28,7 +29,15 @@ public:
   	virtual ~ExprAST() {}
 };
 
-
+class VariableExprAST : public ExprAST {
+public:
+	VariableExprAST(const string &n)
+		:Name(n)
+	{}
+	Value* codegen() const;
+private:
+  	string Name;
+};
 
 class IntNumberExprAST : public ExprAST {
 public:
@@ -69,12 +78,10 @@ protected:
 
 class BlockAST : public InnerExprAST {
 public:
-	BlockAST(vector<ExprAST *> e) : InnerExprAST(e) {}
+	BlockAST(vector<ExprAST *> e) 
+        : InnerExprAST(e) 
+    {}
 	Value *codegen() const;
-
-private:
-	BlockAST(const BlockAST &);
-	BlockAST &operator=(const BlockAST &);
 };
 
 class AddExprAST : public InnerExprAST {
@@ -135,7 +142,7 @@ public:
 
 class CallExprAST : public InnerExprAST {
 public:
-	CallExprAST(string c, const vector<ExprAST*> &v)
+	CallExprAST(std::string c, const vector<ExprAST*> &v)
 		:InnerExprAST(v), Callee(c)
 	{ }
 	Value* codegen() const;
@@ -153,22 +160,24 @@ public:
 
 class AssignExprAST : public InnerExprAST {
 public:
-	AssignExprAST(string s, ExprAST* e)
+	AssignExprAST(std::string s, ExprAST* e)
 		:InnerExprAST(e), VarName(s)
 	{}
 	Value* codegen() const;
 private:
-	string VarName;
-	enum PrimType type;
+ 	std::string VarName;
 };
 
 class TypeAST {
 public:
-  TypeAST(Type *t, string v) : type(t), str(v) {}
-  ~TypeAST();
-
-  Type *type;
-  std::string str;
+	TypeAST(Type *t, string v) 
+        : type(t), VarName(v)
+    {}
+	~TypeAST();
+private:
+	Type *type;
+	std::string VarName;
+    friend class PrototypeAST;
 };
 
 class DeclExprAST : public ExprAST {
@@ -206,6 +215,8 @@ private:
 	PrototypeAST *Proto;
 	ExprAST *Body;
 };
+
+void TheFpmAndModuleInit();
 
 AllocaInst *CreateEntryBlockAlloca(Type *type, Function *TheFunction, const string &VarName);
 

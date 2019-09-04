@@ -19,5 +19,5 @@ ast.o: ast.cpp ast.hpp
 .PHONY: clean
 
 clean:
-	rm -f *~ *tab* lex.yy.c swi2else *.o
+	rm -f *~ *tab* lex.yy.c parser.output swi2else *.o
 
