@@ -37,15 +37,15 @@ void yyerror(std::string s) {
 
 %token if_token else_token while_token for_token switch_token
 case_token int_token double_token char_token default_token eq_token
-include_token ppd_token
+include_token ppd_token void_token
 %token <s> id_token string_token
 %token <d> d_num_token
 %token <i> i_num_token
 
 %type <type> Type
 %type <e> E Loop_or_E Loop Block1
-%type <vec> ArrOfInits
-%type <vec_e> Block
+%type <vec> ArrOfInits ArrOfInits1
+%type <vec_e> Block FCArgs FCArgs1
 %type <t> TypeArg
 %type <p> Proto
 %type <vec_t> Args
@@ -80,7 +80,7 @@ Function: Proto '{' Block1 '}' {
 
 Block1: Block  {
         $$ = new BlockAST(*$1);
-        //delete $1;
+        delete $1;
     }
     ;
 
@@ -113,6 +113,7 @@ Proto: Type id_token '(' Args ')' {
 Type: int_token     { $$ = Type::getInt32Ty(TheContext); }
     //| char_token    {}
     | double_token  { $$ = Type::getDoubleTy(TheContext); }
+    | void_token    { $$ = Type::getVoidTy(TheContext); }
     ;
 
 Args: Args ',' TypeArg  { $$ = $1; $$->push_back($3); }
@@ -120,8 +121,10 @@ Args: Args ',' TypeArg  { $$ = $1; $$->push_back($3); }
     |                   { $$ = new std::vector<TypeAST*>(); }
     ;
 
-TypeArg: double_token id_token  { $$ = new TypeAST(Type::getDoubleTy(TheContext), *$2); delete $2; }
-    |    int_token id_token     { $$ = new TypeAST(Type::getInt32Ty(TheContext), *$2); delete $2; }
+TypeArg: double_token id_token  { $$ = new TypeAST(Type::getDoubleTy(TheContext),
+    *$2); delete $2; }
+    |    int_token id_token     { $$ = new TypeAST(Type::getInt32Ty(TheContext),
+    *$2); delete $2; }
     |    char_token id_token
     ;
 
@@ -134,7 +137,14 @@ E:    E '+' E           { $$ = new AddExprAST($1, $3); }
     | E eq_token E      { $$ = new EqExprAST($1, $3); }
     | id_token '=' E    { $$ = new AssignExprAST(*$1, $3); delete $1;}
     | Type id_token '=' E { 
+        //TODO
         //declaration and definition of var
+    }
+    | id_token '(' FCArgs ')' { 
+        //TODO function call
+        $$ = new CallExprAST(*$1, *$3);
+        delete $1;
+        delete $3;
     }
     | Type ArrOfInits   { $$ = new DeclExprAST($1, *$2); delete $2; }
     | '(' E ')'         { $$ = $2; }
@@ -144,7 +154,16 @@ E:    E '+' E           { $$ = new AddExprAST($1, $3); }
     //| string_token      {}
     | id_token          { $$ = new VariableExprAST(*$1); delete $1; }
     ;
+    
+FCArgs: FCArgs1 { $$ = $1; }
+    | { $$ = new std::vector<ExprAST*>(); }
+    ;
 
+FCArgs1: FCArgs1 ',' E  { $$ = $1; $$->push_back($3); }
+    | E                 { $$ = new std::vector<ExprAST*>(); $$->push_back($1); }
+    ;
+
+//shift/reduce conflict
 ArrOfInits: ArrOfInits ',' id_token {
         $$ = $1;
         $$->push_back(*$3);

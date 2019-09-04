@@ -18,6 +18,7 @@ ID  [a-zA-Z][a-zA-Z0-9_]*
 
 %%
 #include         { return include_token; }
+void             { return void_token; }
 int              { return int_token; }
 double           { return double_token; }
 char             { return char_token; }

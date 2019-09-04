@@ -195,6 +195,9 @@ public:
 	PrototypeAST(Type *t, std::string n, std::vector<TypeAST *> a)
 		: Type(t), Name(n), Args(a) {}
 	Function *codegen() const;
+    Type* getType(){
+        return Type;
+    }
 	string getName() const { return Name; }
 
 private:

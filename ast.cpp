@@ -180,22 +180,53 @@ Value* AssignExprAST::codegen() const {
 	Value *Val = Vec[0]->codegen();
 	if (Val == nullptr)
 		return nullptr;
+    
 
 	AllocaInst* alloca = NamedValues[VarName];
 	if (alloca == nullptr)
 		yyerror("Variable " + VarName + " does not exist");
 
+    Type* ValType = Val->getType();
+    Type* AllocaType = alloca->getAllocatedType();
+    if(ValType != AllocaType)
+        yyerror("Implicit conversion not allowed!");
+    
 	Builder.CreateStore(Val, alloca);
 	
 	return Val;
 }
 
+Value* CallExprAST::codegen() const {
+  Function* CalleeF = TheModule->getFunction(Callee);
+  if (CalleeF == nullptr)
+    yyerror("Function " + Callee + " does not exist");
+
+  unsigned arg_size = CalleeF->arg_size();
+  if (arg_size != Vec.size())
+    yyerror("Function " + Callee + " must be called with " + to_string(arg_size) + " arguments");
+
+  vector<Value*> args;
+  for (unsigned i = 0; i < arg_size; i++) {
+    Value *tmp = Vec[i]->codegen();
+    if (tmp == nullptr)
+      return nullptr;
+    args.push_back(tmp);
+  }
+
+  return Builder.CreateCall(CalleeF, args, "calltmp");
+}
+
 Value *DeclExprAST::codegen() const {
 	Function *TheFunction = Builder.GetInsertBlock()->getParent();
-
+    
+    
 	Value *tmp;
 	for (unsigned i = 0; i < Vec.size(); i++) {
-		AllocaInst *Alloca = CreateEntryBlockAlloca(Types, TheFunction, Vec[i]);
+        AllocaInst *Alloca = NamedValues[Vec[i]];
+        if(Alloca != nullptr)
+            yyerror("Var " + Vec[i] + " already exist! Redefinition of variable not allowed");
+        
+        Alloca = CreateEntryBlockAlloca(Types, TheFunction, Vec[i]);
 
 		tmp = nullptr;
 		if (Types == Type::getDoubleTy(TheContext))
@@ -292,10 +323,15 @@ Function *FunctionAST::codegen() const {
 		NamedValues[Arg.getName()] = Alloca;
 		Builder.CreateStore(&Arg, Alloca);
 	}
-    
-	//TODO fix retval
+	
+	//TODO fix! not real return val
+	
 	if (Value *RetVal = Body->codegen()) {
-		Builder.CreateRet(RetVal);
+        
+        if (Proto->getType() == Type::getVoidTy(TheContext)){
+            RetVal = nullptr;
+        }
+        Builder.CreateRet(RetVal);
 		verifyFunction(*TheFunction);
 		TheFPM->run(*TheFunction);
 		return TheFunction;
