@@ -396,12 +396,14 @@ Value* IfExprAST::codegen() const {
     TheFunction->getBasicBlockList().push_back(MergeBB);
     Builder.SetInsertPoint(MergeBB);
     
-    PHINode *PHI = Builder.CreatePHI(ThenV->getType(), 2, "iftmp");
-    PHI->addIncoming(ThenV, ThenBB);
-    PHI->addIncoming(ElseV, ElseBB);
-    
-    return PHI;
-    
+    //TODO phi node type 
+//     PHINode *PHI = Builder.CreatePHI(ThenV->getType(), 2, "iftmp");
+//     PHI->addIncoming(ThenV, ThenBB);
+//     PHI->addIncoming(ElseV, ElseBB);
+//     
+//     return PHI;
+        return ConstantInt::get(TheContext, APInt(32, 0));
+
 }
 
 Value* WhileExprAST::codegen() const {
@@ -499,15 +501,84 @@ Function *FunctionAST::codegen() const {
 	return NULL;
 }
 
+Value* SwitchExprAST::codegen() const {
+    
+    //generating switch condition
+    Value* SwitchCond = Condition->codegen();
+    if (SwitchCond == nullptr)
+        return nullptr;
+    
+    Function* TheFunction = Builder.GetInsertBlock()->getParent();
+    
+    int num_of_default_cases = 0;
+    //check if theres default case on last position
+    for(auto i: Cases)
+    if(i.first.first == nullptr)
+        num_of_default_cases++;
+    if(num_of_default_cases > 1)
+        yyerror("Too much default cases! Only one allowed");
+    //calculate number of IF statemets
+    int num_of_ifs = Cases.size() - num_of_default_cases;
+    
+    std::vector<BasicBlock*> ThenBBs(num_of_ifs);
+    std::vector<BasicBlock*> ElseBBs(num_of_ifs);
+    BasicBlock* MergeBB = BasicBlock::Create(TheContext, "ifcont");
+    
+    for(int i = 0; i < num_of_ifs; i++) {
+
+        Value* CaseCond;
+        //if current case is not defaultcase
+        CaseCond = Cases[i].first.first->codegen();
+        if(CaseCond == nullptr)
+            return nullptr;
+        
+        Value *IfCondV = Builder.CreateICmpEQ(SwitchCond, CaseCond, "ifcond");
+        
+        ThenBBs[i] = BasicBlock::Create(TheContext, "then", TheFunction);
+        ElseBBs[i] = BasicBlock::Create(TheContext, "else");
+        
+        Builder.CreateCondBr(IfCondV, ThenBBs[i], ElseBBs[i]);
+        Builder.SetInsertPoint(ThenBBs[i]);
+
+        Value* ThenV = Cases[i].first.second->codegen();
+        if(ThenV == nullptr)
+            return nullptr;
+
+        //if case has break stmt jump to MergeBB which is the end
+        if(Cases[i].second){
+            
+        }
+        
+        Builder.CreateBr(MergeBB);
+        ThenBBs[i] = Builder.GetInsertBlock();
+        
+        TheFunction->getBasicBlockList().push_back(ElseBBs[i]);
+        Builder.SetInsertPoint(ElseBBs[i]);        
+        
+        }
+        
+        Builder.CreateBr(MergeBB);
+        ElseBBs[num_of_ifs-1] = Builder.GetInsertBlock();
+        
+    
+        TheFunction->getBasicBlockList().push_back(MergeBB);
+        Builder.SetInsertPoint(MergeBB);     
+       
+        
+    
+    return ConstantInt::get(TheContext, APInt(32, 0));
+    
+}
+
 void TheFpmAndModuleInit(){
     
     TheModule = new Module("swi2else", TheContext);
     TheFPM = new legacy::FunctionPassManager(TheModule);
     
     //TheFPM->add(createInstructionCombiningPass());
-    TheFPM->add(createReassociatePass());
-    TheFPM->add(createNewGVNPass());
-    TheFPM->add(createCFGSimplificationPass());
+    //TheFPM->add(createReassociatePass());
+    //TheFPM->add(createNewGVNPass());
+    //TheFPM->add(createCFGSimplificationPass());
     //TheFPM->add(createPromoteMemoryToRegisterPass());
 
     TheFPM->doInitialization();

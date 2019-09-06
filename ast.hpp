@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <utility>
 #include "llvm/IR/Value.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/IRBuilder.h"
@@ -188,6 +189,18 @@ public:
 		:InnerExprAST(cond, e1, e2)
 	{}
 	Value* codegen() const;
+};
+
+class SwitchExprAST : public ExprAST {
+public:
+    SwitchExprAST(ExprAST* condition, std::vector<std::pair<std::pair<ExprAST*, ExprAST*>, bool>> &cases)
+        : Condition(condition), Cases(cases)
+    {}
+    Value* codegen() const;
+private:
+    ExprAST* Condition;
+    std::vector<std::pair<std::pair<ExprAST*, ExprAST*>, bool>> Cases;
+    
 };
 
 class AssignExprAST : public InnerExprAST {
