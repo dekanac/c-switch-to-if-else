@@ -140,6 +140,30 @@ public:
 	Value* codegen() const;
 };
 
+class NeExprAST : public InnerExprAST {
+public:
+	NeExprAST(ExprAST* l, ExprAST *r)
+		:InnerExprAST(l, r)
+	{}
+	Value* codegen() const;
+};
+
+class LeExprAST : public InnerExprAST {
+public:
+	LeExprAST(ExprAST* l, ExprAST *r)
+		:InnerExprAST(l, r)
+	{}
+	Value* codegen() const;
+};
+
+class GeExprAST : public InnerExprAST {
+public:
+	GeExprAST(ExprAST* l, ExprAST *r)
+		:InnerExprAST(l, r)
+	{}
+	Value* codegen() const;
+};
+
 class CallExprAST : public InnerExprAST {
 public:
 	CallExprAST(std::string c, const vector<ExprAST*> &v)
@@ -148,6 +172,14 @@ public:
 	Value* codegen() const;
 private:
   	string Callee;
+};
+
+class WhileExprAST : public InnerExprAST {
+public:
+  WhileExprAST(ExprAST *e1, ExprAST *e2)
+    :InnerExprAST(e1, e2)
+  {}
+  Value* codegen() const;
 };
 
 class IfExprAST : public InnerExprAST {

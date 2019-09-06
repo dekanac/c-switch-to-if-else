@@ -4,7 +4,6 @@ int proto2(double c){
 }
 
 int test_f(double c) {
-    2;
     proto2(1);
     int r,b,g;
     

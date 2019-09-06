@@ -30,6 +30,10 @@ default          { return default_token; }
 for              { return for_token; }
 while            { return while_token; }
 ==               { return eq_token; }
+!=               { return ne_token; }
+"<="             { return le_token; }
+">="             { return ge_token; }
+
 
 [@<>,+/*();:=!$|'\[\]{}-]      { return *yytext; }
 {ID}             { yylval.s = new std::string(yytext); return id_token; }

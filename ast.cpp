@@ -140,31 +140,60 @@ Value* DivExprAST::codegen() const {
     if(typel == Type::getDoubleTy(TheContext))
         return Builder.CreateFDiv(l, r, "divtmp");
     else if(typel == Type::getInt32Ty(TheContext)){
-        yyerror("Can not divide 2 integers!");
-        return nullptr;
+        return Builder.CreateUDiv(l, r, "divtmp");
     }
     else{
         yyerror("Error matching types!");
         return nullptr;
     }
 }
-
+//TODO FIX TYPES FOR LT GT and EQ operators
 Value* LtExprAST::codegen() const {
     Value *l = Vec[0]->codegen();
     Value *r = Vec[1]->codegen();
     if (!l || !r)
       return nullptr;
-    Value* tmp = Builder.CreateFCmpULT(l, r, "lttmp");
-    return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    Type* typel = l->getType();
+    Type* typer = r->getType();
+    if (typel != typer)
+        yyerror("Types must match!");
+    if (typel == Type::getDoubleTy(TheContext)){
+        Value* tmp = Builder.CreateFCmpULT(l, r, "lttmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else if (typel == Type::getInt32Ty(TheContext)) {
+        Value* tmp = Builder.CreateICmpULT(l, r, "lttmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else{
+        yyerror("Error matching types!");
+        return nullptr;
+    }
+    
 }
 
 Value* GtExprAST::codegen() const {
-	Value *l = Vec[0]->codegen();
-	Value *r = Vec[1]->codegen();
-	if (!l || !r)
-		return nullptr;
-	Value* tmp = Builder.CreateFCmpUGT(l, r, "gttmp");
-	return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    Value *l = Vec[0]->codegen();
+    Value *r = Vec[1]->codegen();
+    if (!l || !r)
+      return nullptr;
+    Type* typel = l->getType();
+    Type* typer = r->getType();
+    if (typel != typer)
+        yyerror("Types must match!");
+    if (typel == Type::getDoubleTy(TheContext)){
+        Value* tmp = Builder.CreateFCmpUGT(l, r, "gttmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else if (typel == Type::getInt32Ty(TheContext)) {
+        Value* tmp = Builder.CreateICmpUGT(l, r, "gttmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else{
+        yyerror("Error matching types!");
+        return nullptr;
+    }
+    
 }
 
 Value* EqExprAST::codegen() const {
@@ -172,15 +201,102 @@ Value* EqExprAST::codegen() const {
     Value *r = Vec[1]->codegen();
     if (!l || !r)
       return nullptr;
-    Value* tmp = Builder.CreateFCmpUEQ(l, r, "lttmp");
-    return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    Type* typel = l->getType();
+    Type* typer = r->getType();
+    if (typel != typer)
+        yyerror("Types must match!");
+    if (typel == Type::getDoubleTy(TheContext)){
+        Value* tmp = Builder.CreateFCmpUEQ(l, r, "eqtmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else if (typel == Type::getInt32Ty(TheContext)) {
+        Value* tmp = Builder.CreateICmpEQ(l, r, "eqtmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else{
+        yyerror("Error matching types!");
+        return nullptr;
+    }
+    
 }
+
+Value* NeExprAST::codegen() const {
+    Value *l = Vec[0]->codegen();
+    Value *r = Vec[1]->codegen();
+    if (!l || !r)
+      return nullptr;
+    Type* typel = l->getType();
+    Type* typer = r->getType();
+    if (typel != typer)
+        yyerror("Types must match!");
+    if (typel == Type::getDoubleTy(TheContext)){
+        Value* tmp = Builder.CreateFCmpUNE(l, r, "netmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else if (typel == Type::getInt32Ty(TheContext)) {
+        Value* tmp = Builder.CreateICmpNE(l, r, "netmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else{
+        yyerror("Error matching types!");
+        return nullptr;
+    }
+    
+}
+
+Value* LeExprAST::codegen() const {
+    Value *l = Vec[0]->codegen();
+    Value *r = Vec[1]->codegen();
+    if (!l || !r)
+      return nullptr;
+    Type* typel = l->getType();
+    Type* typer = r->getType();
+    if (typel != typer)
+        yyerror("Types must match!");
+    if (typel == Type::getDoubleTy(TheContext)){
+        Value* tmp = Builder.CreateFCmpULE(l, r, "letmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else if (typel == Type::getInt32Ty(TheContext)) {
+        Value* tmp = Builder.CreateICmpULE(l, r, "letmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else{
+        yyerror("Error matching types!");
+        return nullptr;
+    }
+    
+}
+
+Value* GeExprAST::codegen() const {
+    Value *l = Vec[0]->codegen();
+    Value *r = Vec[1]->codegen();
+    if (!l || !r)
+      return nullptr;
+    Type* typel = l->getType();
+    Type* typer = r->getType();
+    if (typel != typer)
+        yyerror("Types must match!");
+    if (typel == Type::getDoubleTy(TheContext)){
+        Value* tmp = Builder.CreateFCmpUGE(l, r, "netmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else if (typel == Type::getInt32Ty(TheContext)) {
+        Value* tmp = Builder.CreateICmpUGE(l, r, "getmp");
+        return Builder.CreateUIToFP(tmp, Type::getDoubleTy(TheContext), "booltmp");
+    }
+    else{
+        yyerror("Error matching types!");
+        return nullptr;
+    }
+    
+}
+
 
 Value* AssignExprAST::codegen() const {
 	Value *Val = Vec[0]->codegen();
 	if (Val == nullptr)
 		return nullptr;
-    
 
 	AllocaInst* alloca = NamedValues[VarName];
 	if (alloca == nullptr)
@@ -219,7 +335,6 @@ Value* CallExprAST::codegen() const {
 Value *DeclExprAST::codegen() const {
 	Function *TheFunction = Builder.GetInsertBlock()->getParent();
     
-    
 	Value *tmp;
 	for (unsigned i = 0; i < Vec.size(); i++) {
         AllocaInst *Alloca = NamedValues[Vec[i]];
@@ -249,7 +364,12 @@ Value* IfExprAST::codegen() const {
     if (CondV == nullptr)
       return nullptr;
     
-    Value *IfCondV = Builder.CreateFCmpONE(CondV, ConstantFP::get(TheContext, APFloat(0.0)), "ifcond");
+    Value* IfCondV;
+    Type * CondType = CondV->getType();
+    if(CondType == Type::getDoubleTy(TheContext))
+        IfCondV = Builder.CreateFCmpONE(CondV, ConstantFP::get(TheContext, APFloat(0.0)), "ifcond");
+    else if(CondType == Type::getInt32Ty(TheContext))
+        IfCondV = Builder.CreateICmpEQ(CondV, ConstantInt::get(TheContext, APInt(32, 0)), "ifcond");
 
     Function* TheFunction = Builder.GetInsertBlock()->getParent();
     BasicBlock* ThenBB = BasicBlock::Create(TheContext, "then", TheFunction);
@@ -275,11 +395,47 @@ Value* IfExprAST::codegen() const {
 
     TheFunction->getBasicBlockList().push_back(MergeBB);
     Builder.SetInsertPoint(MergeBB);
-    PHINode *PHI = Builder.CreatePHI(Type::getDoubleTy(TheContext), 2, "iftmp");
+    
+    PHINode *PHI = Builder.CreatePHI(ThenV->getType(), 2, "iftmp");
     PHI->addIncoming(ThenV, ThenBB);
     PHI->addIncoming(ElseV, ElseBB);
     
     return PHI;
+    
+}
+
+Value* WhileExprAST::codegen() const {
+    //TODO types in cond fix needed
+    Function *F = Builder.GetInsertBlock()->getParent();
+    BasicBlock *Loop1BB = BasicBlock::Create(TheContext, "loop1", F);
+    BasicBlock *Loop2BB = BasicBlock::Create(TheContext, "loop2", F);
+    BasicBlock *AfterLoopBB = BasicBlock::Create(TheContext, "afterloop", F);
+    Builder.CreateBr(Loop1BB);
+    Builder.SetInsertPoint(Loop1BB);
+    
+    Value* CondV = Vec[0]->codegen();
+    if (CondV == nullptr)
+      return nullptr;
+    
+    Value* WhileCondV;
+    Type * CondType = CondV->getType();
+    if(CondType == Type::getDoubleTy(TheContext))
+        WhileCondV = Builder.CreateFCmpONE(CondV, ConstantFP::get(TheContext, APFloat(0.0)), "whilecond");
+    else if(CondType == Type::getInt32Ty(TheContext))
+        WhileCondV = Builder.CreateICmpEQ(CondV, ConstantInt::get(TheContext, APInt(32, 0)), "whilecond");
+    
+    Builder.CreateCondBr(WhileCondV, Loop2BB, AfterLoopBB);
+    Loop1BB = Builder.GetInsertBlock();
+
+    Builder.SetInsertPoint(Loop2BB);
+    Value* Tmp = Vec[1]->codegen();
+    if (Tmp == nullptr)
+        return nullptr;
+    Builder.CreateBr(Loop1BB);
+    Loop2BB = Builder.GetInsertBlock();
+
+    Builder.SetInsertPoint(AfterLoopBB);
+    return ConstantInt::get(TheContext, APInt(32, 0));
 }
 
 Function *PrototypeAST::codegen() const {
@@ -287,8 +443,8 @@ Function *PrototypeAST::codegen() const {
 
 	for (unsigned i = 0; i < Args.size(); ++i) {
 		types.push_back(Args[i]->type);
-	}
-
+    }
+    
 	FunctionType *FT = FunctionType::get(Type, types, false);
 
 	Function *F =
@@ -331,11 +487,13 @@ Function *FunctionAST::codegen() const {
         if (Proto->getType() == Type::getVoidTy(TheContext)){
             RetVal = nullptr;
         }
+        
         Builder.CreateRet(RetVal);
 		verifyFunction(*TheFunction);
 		TheFPM->run(*TheFunction);
 		return TheFunction;
 	}
+	
 	TheFunction->eraseFromParent();
 
 	return NULL;
