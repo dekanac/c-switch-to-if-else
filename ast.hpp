@@ -22,8 +22,6 @@ using namespace llvm::legacy;
 using namespace std;
 
 
-enum PrimType { T_INT, T_DOUBLE, T_CHAR, T_STRING };
-
 class ExprAST {
 public:
   	virtual Value* codegen() const = 0;
@@ -211,6 +209,18 @@ public:
 	Value* codegen() const;
 private:
  	std::string VarName;
+};
+
+class DeclAndAssignExprAST : public ExprAST {
+public:
+    DeclAndAssignExprAST(Type* t, std::string n, ExprAST* e)
+        : Expr(e), VarType(t), VarName(n)
+    {}
+    Value *codegen() const;
+private:
+    Type* VarType;
+    std::string VarName;
+    ExprAST* Expr;
 };
 
 class TypeAST {

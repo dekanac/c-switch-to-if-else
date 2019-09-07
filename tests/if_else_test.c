@@ -1,10 +1,8 @@
 double func() {
-    int i; 
-    i = 1;
-    double c, r, p;
-    c = 3.2;
+    int i = 1;
+    double c = 3.2;
+    double r, p;
     while(i <= 7){
-        
         c = c + 1.0;
         i = i + 1;
         if(i == 4){
@@ -14,4 +12,5 @@ double func() {
             c = c + 1.0;
         }
     }
+    c;
 }

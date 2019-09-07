@@ -147,7 +147,7 @@ Value* DivExprAST::codegen() const {
         return nullptr;
     }
 }
-//TODO FIX TYPES FOR LT GT and EQ operators
+
 Value* LtExprAST::codegen() const {
     Value *l = Vec[0]->codegen();
     Value *r = Vec[1]->codegen();
@@ -312,6 +312,47 @@ Value* AssignExprAST::codegen() const {
 	return Val;
 }
 
+Value* DeclAndAssignExprAST::codegen() const {
+    
+    Function *TheFunction = Builder.GetInsertBlock()->getParent();
+    
+	
+    AllocaInst *Alloca = NamedValues[VarName];
+    if(Alloca != nullptr)
+        yyerror("Var " + VarName + " already exist! Redefinition of variable not allowed");
+        
+    Alloca = CreateEntryBlockAlloca(VarType, TheFunction, VarName);
+
+    Value *tmp = nullptr;
+    if (VarType == Type::getDoubleTy(TheContext))
+        tmp = ConstantFP::get(TheContext, APFloat(0.0));
+    if (VarType == Type::getInt32Ty(TheContext))
+		tmp = ConstantInt::get(TheContext, APInt(32, 0));
+    if (tmp == nullptr)
+		return nullptr;
+		
+    NamedValues[VarName] = Alloca;
+    Builder.CreateStore(tmp, Alloca);
+	
+	Value *Val = Expr->codegen();
+	if (Val == nullptr)
+		return nullptr;
+
+	AllocaInst* alloca = NamedValues[VarName];
+	if (alloca == nullptr)
+		yyerror("Variable " + VarName + " does not exist");
+
+    Type* ValType = Val->getType();
+    Type* AllocaType = alloca->getAllocatedType();
+    if(ValType != AllocaType)
+        yyerror("Implicit conversion not allowed!");
+    
+	Builder.CreateStore(Val, alloca);
+	
+	return Val;
+    
+}
+
 Value* CallExprAST::codegen() const {
   Function* CalleeF = TheModule->getFunction(Callee);
   if (CalleeF == nullptr)
@@ -348,7 +389,6 @@ Value *DeclExprAST::codegen() const {
 		tmp = ConstantFP::get(TheContext, APFloat(0.0));
 		if (Types == Type::getInt32Ty(TheContext))
 		tmp = ConstantInt::get(TheContext, APInt(32, 0));
-		//TODO...strings, pointers, chars
 		if (tmp == nullptr)
 		return nullptr;
 		
@@ -407,7 +447,7 @@ Value* IfExprAST::codegen() const {
 }
 
 Value* WhileExprAST::codegen() const {
-    //TODO types in cond fix needed
+
     Function *F = Builder.GetInsertBlock()->getParent();
     BasicBlock *Loop1BB = BasicBlock::Create(TheContext, "loop1", F);
     BasicBlock *Loop2BB = BasicBlock::Create(TheContext, "loop2", F);
@@ -543,17 +583,21 @@ Value* SwitchExprAST::codegen() const {
         Value* ThenV = Cases[i].first.second->codegen();
         if(ThenV == nullptr)
             return nullptr;
-
+        
+        
+        Value* BreakCond = ConstantInt::get(TheContext, APInt(32, 0));
         //if case has break stmt jump to MergeBB which is the end
         if(Cases[i].second){
+            BreakCond = ConstantInt::get(TheContext, APInt(32, 1));
         }
         
-        Builder.CreateBr(MergeBB);
+        Value *IfBreakV = Builder.CreateICmpEQ(BreakCond, ConstantInt::get(TheContext, APInt(32, 0)), "ifbreak");
+        
+        Builder.CreateCondBr(IfBreakV, ElseBBs[i], MergeBB);
         ThenBBs[i] = Builder.GetInsertBlock();
         
         TheFunction->getBasicBlockList().push_back(ElseBBs[i]);
         Builder.SetInsertPoint(ElseBBs[i]);        
-        
     }
         
     Builder.CreateBr(MergeBB);

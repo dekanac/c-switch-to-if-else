@@ -13,7 +13,6 @@ extern Module* TheModule;
 extern LLVMContext TheContext;
 extern legacy::FunctionPassManager* TheFPM;
 
-
 void yyerror(std::string s) {
     std::cerr << s << std::endl;
     exit(EXIT_FAILURE);
@@ -37,7 +36,6 @@ void yyerror(std::string s) {
 
 }
 
-
 %token if_token else_token while_token for_token switch_token
 case_token int_token double_token char_token default_token eq_token
 include_token ppd_token void_token ne_token ge_token le_token break_token
@@ -54,8 +52,6 @@ include_token ppd_token void_token ne_token ge_token le_token break_token
 %type <vec_t> Args
 %type <pair> Case
 %type <vec_pair> CaseArr
-
-
 
 %nonassoc else_token 
 %right '='
@@ -106,15 +102,13 @@ Loop_or_E: Loop     { $$ = $1; }
 Loop: if_token '(' E ')' '{' Block '}' else_token '{' Block '}' {
         $$ = new IfExprAST($3, $6, $10);
     }
-    //| if_token '(' E ')' '{' Block '}' 
+    //| if_token '(' E ')' '{' Block '}' //TODO
     | while_token '(' E ')' '{' Block '}' {
         $$ = new WhileExprAST($3, $6);
     }
     | SwitchStatement {}
     ;
 
-//TODO SWITCH STATEMENT    
-//#####################################
     
 SwitchStatement: switch_token '(' E ')' '{' CaseArr '}' {
         $$ = new SwitchExprAST($3, *$6);
@@ -133,7 +127,7 @@ CaseArr: CaseArr Case {
         delete $1;
     }
     ;
-    
+
 Case: case_token i_num_token ':' Block  {
         auto Mpair = new std::pair<std::pair<ExprAST*, ExprAST*>, bool>();
         auto Epair = new std::pair<ExprAST*, ExprAST*>();
@@ -164,9 +158,6 @@ Case: case_token i_num_token ':' Block  {
     }
     ;
     
-    
-//#####################################
-
 Proto: Type id_token '(' Args ')' {
     $$ = new PrototypeAST($1, *$2, *$4);
     delete $2;
@@ -175,7 +166,6 @@ Proto: Type id_token '(' Args ')' {
     ;
 
 Type: int_token     { $$ = Type::getInt32Ty(TheContext); }
-    //| char_token    {}
     | double_token  { $$ = Type::getDoubleTy(TheContext); }
     | void_token    { $$ = Type::getVoidTy(TheContext); }
     ;
@@ -189,7 +179,6 @@ TypeArg: double_token id_token  { $$ = new TypeAST(Type::getDoubleTy(TheContext)
     *$2); delete $2; }
     |    int_token id_token     { $$ = new TypeAST(Type::getInt32Ty(TheContext),
     *$2); delete $2; }
-    //|    char_token id_token
     ;
 
 E:    E '+' E           { $$ = new AddExprAST($1, $3); }
@@ -203,7 +192,10 @@ E:    E '+' E           { $$ = new AddExprAST($1, $3); }
     | E ne_token E      { $$ = new NeExprAST($1, $3); }
     | E eq_token E      { $$ = new EqExprAST($1, $3); }
     | id_token '=' E    { $$ = new AssignExprAST(*$1, $3); delete $1;}
-    | Type id_token '=' E {} //TODO 
+    | Type id_token '=' E {
+        $$ = new DeclAndAssignExprAST($1, *$2, $4);
+        delete $2;
+    }
     | id_token '(' FCArgs ')' { 
         $$ = new CallExprAST(*$1, *$3);
         delete $1;
@@ -213,8 +205,6 @@ E:    E '+' E           { $$ = new AddExprAST($1, $3); }
     | '(' E ')'         { $$ = $2; }
     | i_num_token       { $$ = new IntNumberExprAST($1); }
     | d_num_token       { $$ = new DoubleNumberExprAST($1); }
-    //| char_token        {}
-    //| string_token      {}
     | id_token          { $$ = new VariableExprAST(*$1); delete $1; }
     ;
     
@@ -226,7 +216,7 @@ FCArgs1: FCArgs1 ',' E  { $$ = $1; $$->push_back($3); }
     | E                 { $$ = new std::vector<ExprAST*>(); $$->push_back($1); }
     ;
 
-//shift/reduce conflict
+//shift/reduce conflict ----- default is right :)
 
 ArrOfInits: ArrOfInits ',' id_token {
         $$ = $1;
