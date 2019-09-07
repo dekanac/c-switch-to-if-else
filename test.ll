@@ -311,3 +311,45 @@ else:                                             ; preds = %loop2
 ifcont:                                           ; preds = %else, %then
   br label %loop1
 }
+; ModuleID = 'swi2else'
+source_filename = "swi2else"
+
+define i32 @main() {
+entry:
+  %c = alloca i32
+  store i32 0, i32* %c
+  store i32 0, i32* %c
+  br i1 false, label %then, label %else
+
+then:                                             ; preds = %entry
+  store i32 1, i32* %c
+  br label %ifcont
+
+else:                                             ; preds = %entry
+  br i1 true, label %then1, label %else2
+
+then1:                                            ; preds = %else
+  store i32 2, i32* %c
+  br label %ifcont
+
+else2:                                            ; preds = %else
+  br i1 false, label %then3, label %else4
+
+then3:                                            ; preds = %else2
+  store i32 3, i32* %c
+  br label %ifcont
+
+else4:                                            ; preds = %else2
+  br i1 true, label %then5, label %else6
+
+then5:                                            ; preds = %else4
+  store i32 99, i32* %c
+  br label %ifcont
+
+else6:                                            ; preds = %else4
+  br label %ifcont
+
+ifcont:                                           ; preds = %else6, %then5, %then3, %then1, %then
+  %c7 = load i32, i32* %c
+  ret i32 %c7
+}

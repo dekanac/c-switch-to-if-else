@@ -1,5 +1,5 @@
 #include "ast.hpp"
-
+//TODO lifespan of vars not working
 void yyerror(string s);
 
 LLVMContext TheContext;
@@ -527,7 +527,7 @@ Value* SwitchExprAST::codegen() const {
     for(int i = 0; i < num_of_ifs; i++) {
 
         Value* CaseCond;
-        //if current case is not defaultcase
+        if(Cases[i].first.first != nullptr)
         CaseCond = Cases[i].first.first->codegen();
         if(CaseCond == nullptr)
             return nullptr;
@@ -546,7 +546,6 @@ Value* SwitchExprAST::codegen() const {
 
         //if case has break stmt jump to MergeBB which is the end
         if(Cases[i].second){
-            
         }
         
         Builder.CreateBr(MergeBB);
@@ -555,15 +554,15 @@ Value* SwitchExprAST::codegen() const {
         TheFunction->getBasicBlockList().push_back(ElseBBs[i]);
         Builder.SetInsertPoint(ElseBBs[i]);        
         
-        }
+    }
         
-        Builder.CreateBr(MergeBB);
-        ElseBBs[num_of_ifs-1] = Builder.GetInsertBlock();
-        
+    Builder.CreateBr(MergeBB);
+    ElseBBs[num_of_ifs-1] = Builder.GetInsertBlock();
+
+    //if default case exists
+    TheFunction->getBasicBlockList().push_back(MergeBB);
+    Builder.SetInsertPoint(MergeBB);     
     
-        TheFunction->getBasicBlockList().push_back(MergeBB);
-        Builder.SetInsertPoint(MergeBB);     
-       
         
     
     return ConstantInt::get(TheContext, APInt(32, 0));
@@ -576,11 +575,11 @@ void TheFpmAndModuleInit(){
     TheFPM = new legacy::FunctionPassManager(TheModule);
     
     //TheFPM->add(createInstructionCombiningPass());
-    //TheFPM->add(createReassociatePass());
+    TheFPM->add(createReassociatePass());
     //TheFPM->add(createNewGVNPass());
     //TheFPM->add(createCFGSimplificationPass());
     //TheFPM->add(createPromoteMemoryToRegisterPass());
-
+    
     TheFPM->doInitialization();
     
 }

@@ -1,16 +1,18 @@
-int main() {
+
+int func() {
     int c;
-    c = 0;
+    c = 2;
     switch (5) {
-        
+
         case 1:
-            c = 2;
+            c = 1;
         case 5:
             c = 2;
-        case 3:
+        case 7:
             c = 3;
-        case 5:
-            c = 99;
+        case 8:
+            c = 5;
+            break;
     }
     c;
 }
