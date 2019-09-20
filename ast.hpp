@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <algorithm>
 #include "llvm/IR/Value.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/IRBuilder.h"
@@ -197,7 +198,7 @@ public:
     Value* codegen() const;
 private:
     ExprAST* Condition;
-    std::vector<std::pair<std::pair<ExprAST*, ExprAST*>, bool>> Cases;
+    std::vector<std::pair<std::pair<ExprAST*, ExprAST*>, bool>> &Cases;
     
 };
 
@@ -277,6 +278,8 @@ private:
 void TheFpmAndModuleInit();
 
 AllocaInst *CreateEntryBlockAlloca(Type *type, Function *TheFunction, const string &VarName);
+
+AllocaInst *FindVarInTable(std::string Name);
 
 #endif
 

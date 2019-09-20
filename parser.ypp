@@ -1,4 +1,5 @@
 %{
+
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -6,6 +7,8 @@
 #include <vector>
 #include <utility>
 #include "ast.hpp"
+
+//#define YYDEBUG 1
 
 extern int yylex();
 
@@ -33,7 +36,6 @@ void yyerror(std::string s) {
     PrototypeAST *p;
     TypeAST *t;
     Type *type;
-
 }
 
 %token if_token else_token while_token for_token switch_token
@@ -58,7 +60,6 @@ include_token ppd_token void_token ne_token ge_token le_token break_token
 %left '<' '>' eq_token le_token ge_token ne_token
 %left '+' '-'
 %left '*' '/'
-
 
 %%
 
@@ -102,62 +103,56 @@ Loop_or_E: Loop     { $$ = $1; }
 Loop: if_token '(' E ')' '{' Block '}' else_token '{' Block '}' {
         $$ = new IfExprAST($3, $6, $10);
     }
-    //| if_token '(' E ')' '{' Block '}' //TODO
+    | if_token '(' E ')' '{' Block '}' {
+        $$ = new IfExprAST($3, $6, nullptr);
+    }
     | while_token '(' E ')' '{' Block '}' {
         $$ = new WhileExprAST($3, $6);
     }
-    | SwitchStatement {}
+    | SwitchStatement { $$ = $1; }
     ;
 
     
 SwitchStatement: switch_token '(' E ')' '{' CaseArr '}' {
         $$ = new SwitchExprAST($3, *$6);
-        delete $6;
+        //delete $6;
     }
     ;
 
 CaseArr: CaseArr Case {
         $$ = $1;
         $$->push_back(*$2);
-        delete $2;
     }
     | Case { 
         $$ = new std::vector<std::pair<std::pair<ExprAST*, ExprAST*>, bool>>();
         $$->push_back(*$1);
-        delete $1;
     }
     ;
 
 Case: case_token i_num_token ':' Block  {
-        auto Mpair = new std::pair<std::pair<ExprAST*, ExprAST*>, bool>();
-        auto Epair = new std::pair<ExprAST*, ExprAST*>();
-        Epair->first = new IntNumberExprAST($2);
-        Epair->second = $4;
-        Mpair->first = *Epair;
-        Mpair->second = false;
-        $$ = Mpair;
         
+        auto num = new IntNumberExprAST($2);
+        auto r = std::make_pair((ExprAST*)num, $4);
+        auto p = std::make_pair(r, false);
+        $$ = &p;
+       
     }
     | case_token i_num_token ':' Block break_token ';' {
-        auto Mpair = new std::pair<std::pair<ExprAST*, ExprAST*>, bool>();
-        auto Epair = new std::pair<ExprAST*, ExprAST*>();
-        Epair->first = new IntNumberExprAST($2);
-        Epair->second = $4;
-        Mpair->first = *Epair;
-        Mpair->second = true;
-        $$ = Mpair;
+        
+        auto num = new IntNumberExprAST($2);
+        auto r = std::make_pair((ExprAST*)num, $4);
+        auto p = std::make_pair(r, true);
+        $$ = &p;
+
     }
     | default_token ':' Block {
-        auto Mpair = new std::pair<std::pair<ExprAST*, ExprAST*>, bool>();
-        auto Epair = new std::pair<ExprAST*, ExprAST*>();
-        Epair->first = nullptr;
-        Epair->second = $3;
-        Mpair->first = *Epair;
-        Mpair->second = false;
-        $$ = Mpair;
+    
+        auto r = std::make_pair((ExprAST*)nullptr, $3);
+        auto p = std::make_pair(r, false);
+        $$ = &p;
     }
     ;
-    
+ 
 Proto: Type id_token '(' Args ')' {
     $$ = new PrototypeAST($1, *$2, *$4);
     delete $2;
@@ -216,8 +211,6 @@ FCArgs1: FCArgs1 ',' E  { $$ = $1; $$->push_back($3); }
     | E                 { $$ = new std::vector<ExprAST*>(); $$->push_back($1); }
     ;
 
-//shift/reduce conflict ----- default is right :)
-
 ArrOfInits: ArrOfInits ',' id_token {
         $$ = $1;
         $$->push_back(*$3);
@@ -228,12 +221,17 @@ ArrOfInits: ArrOfInits ',' id_token {
         $$->push_back(*$1);
         delete $1;
     }
+    ;
 
 %%
 
 
 
 int main(int argc, char **argv) {
+    
+    #if YYDEBUG
+        yydebug = 1;
+    #endif
     
     TheFpmAndModuleInit();
     

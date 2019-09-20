@@ -5,6 +5,7 @@ void yyerror(string s);
 LLVMContext TheContext;
 IRBuilder<> Builder(TheContext);
 Module* TheModule;
+std::vector<std::map<std::string, AllocaInst*>> NamedValuesVec;
 map<string, AllocaInst*> NamedValues;
 legacy::FunctionPassManager* TheFPM;
 
@@ -17,7 +18,7 @@ Value* DoubleNumberExprAST::codegen() const {
 }
 
 Value* VariableExprAST::codegen() const {
-	AllocaInst* tmp = NamedValues[Name];
+	AllocaInst* tmp = FindVarInTable(Name);
 	if (tmp == nullptr)
 		yyerror("Variable " + Name + " does not exist!");
 	return Builder.CreateLoad(tmp, Name);
@@ -58,12 +59,18 @@ InnerExprAST::InnerExprAST(ExprAST *e1, ExprAST *e2, ExprAST *e3, ExprAST *e4) {
 
 Value *BlockAST::codegen() const {
     
+    NamedValuesVec.push_back(NamedValues);
+    NamedValues.clear();
+    
     Value *tmp = nullptr;
     for(auto i: Vec){
         tmp = i->codegen();
         if(tmp == nullptr)
             yyerror("Codegen err");
     }
+    
+    NamedValues = NamedValuesVec.back();
+    NamedValuesVec.pop_back();
     return tmp;
 }
 
@@ -298,7 +305,7 @@ Value* AssignExprAST::codegen() const {
 	if (Val == nullptr)
 		return nullptr;
 
-	AllocaInst* alloca = NamedValues[VarName];
+	AllocaInst* alloca = FindVarInTable(VarName);
 	if (alloca == nullptr)
 		yyerror("Variable " + VarName + " does not exist");
 
@@ -338,7 +345,7 @@ Value* DeclAndAssignExprAST::codegen() const {
 	if (Val == nullptr)
 		return nullptr;
 
-	AllocaInst* alloca = NamedValues[VarName];
+	AllocaInst* alloca = FindVarInTable(VarName);
 	if (alloca == nullptr)
 		yyerror("Variable " + VarName + " does not exist");
 
@@ -379,9 +386,9 @@ Value *DeclExprAST::codegen() const {
 	Value *tmp;
 	for (unsigned i = 0; i < Vec.size(); i++) {
         AllocaInst *Alloca = NamedValues[Vec[i]];
-        if(Alloca != nullptr)
-            yyerror("Var " + Vec[i] + " already exist! Redefinition of variable not allowed");
-        
+         if(Alloca != nullptr)
+              yyerror("Var " + Vec[i] + " already exist! Redefinition of variable not allowed");
+         
         Alloca = CreateEntryBlockAlloca(Types, TheFunction, Vec[i]);
 
 		tmp = nullptr;
@@ -424,25 +431,23 @@ Value* IfExprAST::codegen() const {
     	return nullptr;
     Builder.CreateBr(MergeBB);
     ThenBB = Builder.GetInsertBlock();
-
+    
     TheFunction->getBasicBlockList().push_back(ElseBB);
     Builder.SetInsertPoint(ElseBB);
-    Value* ElseV = Vec[2]->codegen();
-    if (ElseV == nullptr)
-      	return nullptr;
+    
+    if(Vec[2] != nullptr){
+        Value* ElseV = Vec[2]->codegen();
+        if (ElseV == nullptr)
+            return nullptr;
+    }
+    
     Builder.CreateBr(MergeBB);
     ElseBB = Builder.GetInsertBlock();
 
     TheFunction->getBasicBlockList().push_back(MergeBB);
     Builder.SetInsertPoint(MergeBB);
     
-    //TODO phi node type 
-//     PHINode *PHI = Builder.CreatePHI(ThenV->getType(), 2, "iftmp");
-//     PHI->addIncoming(ThenV, ThenBB);
-//     PHI->addIncoming(ElseV, ElseBB);
-//     
-//     return PHI;
-        return ConstantInt::get(TheContext, APInt(32, 0));
+    return ConstantInt::get(TheContext, APInt(32, 0));
 
 }
 
@@ -522,8 +527,6 @@ Function *FunctionAST::codegen() const {
 		Builder.CreateStore(&Arg, Alloca);
 	}
 	
-	//TODO fix! not real return val
-	
 	if (Value *RetVal = Body->codegen()) {
         
         if (Proto->getType() == Type::getVoidTy(TheContext)){
@@ -551,10 +554,22 @@ Value* SwitchExprAST::codegen() const {
     Function* TheFunction = Builder.GetInsertBlock()->getParent();
     
     int num_of_default_cases = 0;
-    //check if theres default case on last position
-    for(auto i: Cases)
-    if(i.first.first == nullptr)
-        num_of_default_cases++;
+
+    //check if default case exists 
+    for(int i = 0; i < Cases.size(); i++){
+        if(Cases[i].first.first == nullptr){
+            num_of_default_cases++;
+            
+            
+            //************dangerous buisness****************
+            
+            //TODO DEFAULT CASE
+            
+            //**********************************************
+        }
+    }
+    
+    
     if(num_of_default_cases > 1)
         yyerror("Too much default cases! Only one allowed");
     //calculate number of IF statemets
@@ -564,11 +579,16 @@ Value* SwitchExprAST::codegen() const {
     std::vector<BasicBlock*> ElseBBs(num_of_ifs);
     BasicBlock* MergeBB = BasicBlock::Create(TheContext, "ifcont");
     
+    
+    //default is num_of_ifs
     for(int i = 0; i < num_of_ifs; i++) {
-
+        
         Value* CaseCond;
+        
+        //if current case is not default case
         if(Cases[i].first.first != nullptr)
-        CaseCond = Cases[i].first.first->codegen();
+            CaseCond = Cases[i].first.first->codegen();
+        
         if(CaseCond == nullptr)
             return nullptr;
         
@@ -583,7 +603,6 @@ Value* SwitchExprAST::codegen() const {
         Value* ThenV = Cases[i].first.second->codegen();
         if(ThenV == nullptr)
             return nullptr;
-        
         
         Value* BreakCond = ConstantInt::get(TheContext, APInt(32, 0));
         //if case has break stmt jump to MergeBB which is the end
@@ -602,12 +621,9 @@ Value* SwitchExprAST::codegen() const {
         
     Builder.CreateBr(MergeBB);
     ElseBBs[num_of_ifs-1] = Builder.GetInsertBlock();
-
-    //if default case exists
-    TheFunction->getBasicBlockList().push_back(MergeBB);
-    Builder.SetInsertPoint(MergeBB);     
     
-        
+    TheFunction->getBasicBlockList().push_back(MergeBB);
+    Builder.SetInsertPoint(MergeBB);    
     
     return ConstantInt::get(TheContext, APInt(32, 0));
     
@@ -632,4 +648,18 @@ void TheFpmAndModuleInit(){
 AllocaInst *CreateEntryBlockAlloca(Type *type, Function *TheFunction, const string &VarName) {
   	IRBuilder<> TmpB(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
  	return TmpB.CreateAlloca(type, 0, VarName);
+}
+
+AllocaInst *FindVarInTable(std::string Name) {
+    AllocaInst* Var = nullptr;
+    if((Var = NamedValues[Name]) == nullptr) {
+        for (int i = NamedValuesVec.size()-1; i >= 0; --i) {
+            auto VarIter = NamedValuesVec[i].find(Name); 
+            if (VarIter != NamedValuesVec[i].end()) {
+                Var = VarIter->second;
+                break;
+            }
+        }
+    }
+    return Var;
 }

@@ -1,13 +1,22 @@
 int func() {
-    int c;
-    c = 0;
-    switch (4) {
-
-        case 1:
-            c = 1;
-            break;
-        default:
-            c = 2;
+    int c = 22;
+    int r = 2;
+    int i = 2;
+    
+    while(c < 25) {
+        r = r + 200;
+        c = c + 1;
+        int c = 2;
     }
-    c;
+    switch(400) {
+        case 2:
+            r = 1;
+        case 200: 
+            2;
+        case 400:
+            r = 2000;
+            int c = 2;
+    }
+    
+    c;    
 }

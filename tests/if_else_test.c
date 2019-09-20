@@ -1,15 +1,11 @@
-double func() {
+int func() {
     int i = 1;
-    double c = 3.2;
-    double r, p;
+    int c = 3;
     while(i <= 7){
-        c = c + 1.0;
+        c = c + 1;
         i = i + 1;
-        if(i == 4){
-            c = c - 1.0;
-        }
-        else {
-            c = c + 1.0;
+        if(i == 199){
+            c = 1;
         }
     }
     c;

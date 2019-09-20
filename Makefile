@@ -1,5 +1,5 @@
 CC = clang++
-DEBUG =
+DEBUG = -g
 CPPFLAGS=$(shell llvm-config --cxxflags)
 LDFLAGS=$(shell llvm-config --ldflags --libs)
 
@@ -19,5 +19,5 @@ ast.o: ast.cpp ast.hpp
 .PHONY: clean
 
 clean:
-	rm -f *~ *tab* lex.yy.c parser.output swi2else *.o *.out
+	rm -f *~ *tab* lex.yy.c parser.output swi2else *.o *.out tests/*.ll tests/*.s
 
