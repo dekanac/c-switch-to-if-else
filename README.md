@@ -7,7 +7,7 @@ Takes C code as a input, transform switch statements to if/else.
     sudo apt-get install bison
     sudo apt-get install flex
     
-**- Instalation:**
+**- Installation:**
 
     make
     
